@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/main}">
+<head>
+    <title>Question Form</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="card">
+            <div class="card-header">
+                <h3>Add/Edit Question</h3>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/admin/questions/save}" method="post" th:object="${question}">
+                    <input type="hidden" th:field="*{id}">
+                    <input type="hidden" name="quizId" th:value="${quiz.id}">
+                    
+                    <div class="mb-3">
+                        <label>Question Content</label>
+                        <textarea class="form-control" th:field="*{content}" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label>Marks</label>
+                        <input type="number" class="form-control" th:field="*{marks}" required>
+                    </div>
+                    
+                    <div id="answers-container">
+                        <div class="mb-3" th:each="answer, stat : *{answers}">
+                            <div class="input-group">
+                                <input type="text" class="form-control" th:field="*{answers[__${stat.index}__].content}">
+                                <div class="input-group-append">
+                                    <div class="input-group-text">
+                                        <input type="radio" name="correctAnswer" th:value="${stat.index}">
+                                        Correct Answer
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="btn btn-secondary mb-3" onclick="addAnswer()">Add Answer Option</button>
+                    <button type="submit" class="btn btn-primary">Save Question</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script th:inline="javascript">
+        function addAnswer() {
+            const container = document.getElementById('answers-container');
+            const answerCount = container.children.length;
+            
+            const newAnswer = `
+                <div class="mb-3">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="answers[${answerCount}].content" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <input type="radio" name="correctAnswer" value="${answerCount}">
+                                Correct Answer
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', newAnswer);
+        }
+    </script>
+</body>
+</html>

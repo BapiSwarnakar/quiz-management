@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Dashboard</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <h2>Quiz Categories</h2>
+        <div class="row">
+            <div class="col-md-4" th:each="category : ${categories}">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${category.name}">Category Name</h5>
+                        <p class="card-text" th:text="${category.description}">Description</p>
+                        <a th:href="@{/category/{id}(id=${category.id})}" class="btn btn-primary">View Quizzes</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

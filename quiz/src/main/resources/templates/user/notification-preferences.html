@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/main}">
+<head>
+    <title>Notification Preferences</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="card">
+            <div class="card-header">Notification Settings</div>
+            <div class="card-body">
+                <form th:action="@{/preferences/notifications}" method="post" th:object="${preferences}">
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" id="emailNotifications" 
+                               th:field="*{emailNotifications}">
+                        <label class="form-check-label" for="emailNotifications">
+                            Email Notifications
+                        </label>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" id="quizResultNotification" 
+                               th:field="*{quizResultNotification}">
+                        <label class="form-check-label" for="quizResultNotification">
+                            Quiz Result Notifications
+                        </label>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" id="newQuizNotification" 
+                               th:field="*{newQuizNotification}">
+                        <label class="form-check-label" for="newQuizNotification">
+                            New Quiz Notifications
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Save Preferences</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

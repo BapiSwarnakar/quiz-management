@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/main}">
+<head>
+    <title>Admin Dashboard</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="row">
+            <div class="col-md-3 mb-4">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h5>Total Users</h5>
+                        <h2 th:text="${userCount}">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h5>Active Quizzes</h5>
+                        <h2 th:text="${quizCount}">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <h5>Categories</h5>
+                        <h2 th:text="${categories.size()}">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Quick Actions</h4>
+                    </div>
+                    <div class="card-body">
+                        <a href="/admin/users" class="btn btn-primary me-2">Manage Users</a>
+                        <a href="/admin/quizzes" class="btn btn-success me-2">Manage Quizzes</a>
+                        <a href="/admin/categories" class="btn btn-info me-2">Manage Categories</a>
+                        <a href="/admin/reports" class="btn btn-warning">View Reports</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

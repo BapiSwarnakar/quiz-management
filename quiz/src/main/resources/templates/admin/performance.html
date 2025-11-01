@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/main}">
+<head>
+    <title>Performance Monitoring</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Memory Usage</div>
+                    <div class="card-body">
+                        <canvas id="memoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Active Users/Quizzes</div>
+                    <div class="card-body">
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script th:inline="javascript">
+            const socket = new SockJS('/ws');
+            const stompClient = Stomp.over(socket);
+            
+            stompClient.connect({}, function(frame) {
+                stompClient.subscribe('/topic/performance', function(message) {
+                    const data = JSON.parse(message.body);
+                    updateCharts(data);
+                });
+            });
+
+            function updateCharts(data) {
+                // Update memory chart
+                memoryChart.data.datasets[0].data = [
+                    data.heapUsage / 1024 / 1024,
+                    (data.heapMax - data.heapUsage) / 1024 / 1024
+                ];
+                memoryChart.update();
+
+                // Update activity chart
+                activityChart.data.datasets[0].data = [data.activeUsers];
+                activityChart.data.datasets[1].data = [data.activeQuizzes];
+                activityChart.update();
+            }
+
+            // Initialize charts
+            const memoryChart = new Chart(document.getElementById('memoryChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['Used Memory (MB)', 'Free Memory (MB)'],
+                    datasets: [{
+                        data: [0, 0],
+                        backgroundColor: ['#ff6384', '#36a2eb']
+                    }]
+                }
+            });
+
+            const activityChart = new Chart(document.getElementById('activityChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Current Activity'],
+                    datasets: [{
+                        label: 'Active Users',
+                        data: [0],
+                        backgroundColor: '#ff6384'
+                    }, {
+                        label: 'Active Quizzes',
+                        data: [0],
+                        backgroundColor: '#36a2eb'
+                    }]
+                }
+            });
+        </script>
+    </div>
+</body>
+</html>

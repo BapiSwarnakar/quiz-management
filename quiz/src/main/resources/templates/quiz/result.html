@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Quiz Result</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="card">
+            <div class="card-header">
+                <h3>Quiz Result: <span th:text="${result.quiz.title}"></span></h3>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body text-center">
+                                <h5>Total Marks</h5>
+                                <h3 th:text="${result.totalMarks}">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body text-center">
+                                <h5>Obtained Marks</h5>
+                                <h3 th:text="${result.obtainedMarks}">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-info text-white">
+                            <div class="card-body text-center">
+                                <h5>Correct Answers</h5>
+                                <h3 th:text="${result.correctAnswers}">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-warning text-white">
+                            <div class="card-body text-center">
+                                <h5>Wrong Answers</h5>
+                                <h3 th:text="${result.wrongAnswers}">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <a href="/dashboard" class="btn btn-primary">Back to Dashboard</a>
+                <a th:href="@{/quiz/review/{id}(id=${result.id})}" class="btn btn-info">Review Answers</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

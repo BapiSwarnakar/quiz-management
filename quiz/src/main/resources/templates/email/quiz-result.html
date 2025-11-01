@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Quiz Results</title>
+</head>
+<body style="font-family: Arial, sans-serif;">
+    <h2>Hello <span th:text="${name}">User</span>!</h2>
+    <p>Here are your quiz results:</p>
+    
+    <div style="background-color: #f5f5f5; padding: 20px; border-radius: 5px;">
+        <p><strong>Quiz:</strong> <span th:text="${result.quiz.title}">Quiz Title</span></p>
+        <p><strong>Score:</strong> <span th:text="${result.obtainedMarks + '/' + result.totalMarks}">0/0</span></p>
+        <p><strong>Correct Answers:</strong> <span th:text="${result.correctAnswers}">0</span></p>
+        <p><strong>Time Taken:</strong> <span th:text="${result.timeTaken + ' minutes'}">0 minutes</span></p>
+    </div>
+</body>
+</html>

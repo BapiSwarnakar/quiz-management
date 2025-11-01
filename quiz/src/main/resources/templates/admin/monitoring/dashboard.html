@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/main}">
+<head>
+    <title>System Monitoring</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">Quiz Activity</div>
+                    <div class="card-body">
+                        <canvas id="quizActivityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">System Health</div>
+                    <div class="card-body">
+                        <div id="healthStatus"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script th:inline="javascript">
+            const metrics = /*[[${metrics}]]*/ {};
+            
+            // Initialize charts with metrics data
+            const ctx = document.getElementById('quizActivityChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: metrics.timeLabels,
+                    datasets: [{
+                        label: 'Quizzes Started',
+                        data: metrics.quizStarts
+                    }, {
+                        label: 'Quizzes Completed',
+                        data: metrics.quizCompletions
+                    }]
+                }
+            });
+        </script>
+    </div>
+</body>
+</html>

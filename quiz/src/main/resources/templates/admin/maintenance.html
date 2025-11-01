@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/main}">
+<head>
+    <title>System Maintenance</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">System Status</div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Last Backup
+                                <span th:text="${#temporals.format(status.lastBackup, 'dd-MM-yyyy HH:mm')}"></span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Database Size
+                                <span th:text="${status.databaseSize + ' MB'}"></span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Upload Directory Size
+                                <span th:text="${status.uploadSize + ' MB'}"></span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                System Uptime
+                                <span th:text="${status.systemUptime}"></span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">Maintenance Actions</div>
+                    <div class="card-body">
+                        <form th:action="@{/admin/maintenance/backup}" method="post" class="mb-3">
+                            <button type="submit" class="btn btn-primary w-100">Create Backup</button>
+                        </form>
+                        <form th:action="@{/admin/maintenance/optimize}" method="post" class="mb-3">
+                            <button type="submit" class="btn btn-warning w-100">Optimize Database</button>
+                        </form>
+                        <form th:action="@{/admin/maintenance/cleanup}" method="post">
+                            <button type="submit" class="btn btn-danger w-100">Cleanup Old Data</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

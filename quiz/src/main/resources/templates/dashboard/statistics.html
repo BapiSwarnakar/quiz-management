@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/main}">
+<head>
+    <title>Statistics</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card text-center mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Quizzes Taken</h5>
+                        <h2 th:text="${statistics.totalQuizzes}">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Average Score</h5>
+                        <h2 th:text="${#numbers.formatDecimal(statistics.averageScore, 1, 1)} + '%'">0%</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Time Spent</h5>
+                        <h2 th:text="${statistics.totalTimeSpent} + ' mins'">0 mins</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Recent Quiz Results</div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Quiz</th>
+                                <th>Score</th>
+                                <th>Time Taken</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="result : ${statistics.recentResults}">
+                                <td th:text="${result.quiz.title}">Quiz Title</td>
+                                <td th:text="${result.obtainedMarks + '/' + result.totalMarks}">Score</td>
+                                <td th:text="${result.timeTaken + ' mins'}">Time</td>
+                                <td th:text="${#temporals.format(result.endTime, 'dd-MM-yyyy HH:mm')}">Date</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

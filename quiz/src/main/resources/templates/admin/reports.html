@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/main}">
+<head>
+    <title>Admin Reports</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="row">
+            <div class="col-md-12 mb-4">
+                <div class="card">
+                    <div class="card-header">Quiz Performance Overview</div>
+                    <div class="card-body">
+                        <canvas id="quizPerformanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Detailed Reports</span>
+                        <div>
+                            <button class="btn btn-primary" onclick="exportReport()">Export Report</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Quiz</th>
+                                        <th>Total Attempts</th>
+                                        <th>Average Score</th>
+                                        <th>Pass Rate</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="report : ${quizReports}">
+                                        <td th:text="${report.quizTitle}">Quiz Title</td>
+                                        <td th:text="${report.totalAttempts}">0</td>
+                                        <td th:text="${report.averageScore + '%'}">0%</td>
+                                        <td th:text="${report.passRate + '%'}">0%</td>
+                                        <td>
+                                            <a th:href="@{/admin/reports/quiz/{id}(id=${report.quizId})}" 
+                                               class="btn btn-sm btn-info">View Details</a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        // Chart initialization
+        const ctx = document.getElementById('quizPerformanceChart').getContext('2d');
+        const quizData = /*[[${quizReports}]]*/ [];
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: quizData.map(report => report.quizTitle),
+                datasets: [{
+                    label: 'Average Score (%)',
+                    data: quizData.map(report => report.averageScore),
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+        function exportReport() {
+            const data = /*[[${quizReports}]]*/ [];
+            const csvContent = "data:text/csv;charset=utf-8," 
+                + "Quiz Title,Total Attempts,Average Score,Pass Rate\n"
+                + data.map(row => `${row.quizTitle},${row.totalAttempts},${row.averageScore}%,${row.passRate}%`).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "quiz_report.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>

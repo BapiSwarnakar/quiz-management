@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Register</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">Register</div>
+                    <div class="card-body">
+                        <form th:action="@{/register}" th:object="${user}" method="post" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="name">Name</label>
+                                <input type="text" class="form-control" id="name" th:field="*{name}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email">Email</label>
+                                <input type="email" class="form-control" id="email" th:field="*{email}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="mobile">Mobile</label>
+                                <input type="text" class="form-control" id="mobile" th:field="*{mobile}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label>Gender</label>
+                                <select class="form-control" th:field="*{gender}">
+                                    <option value="MALE">Male</option>
+                                    <option value="FEMALE">Female</option>
+                                    <option value="OTHER">Other</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="photo">Photo</label>
+                                <input type="file" class="form-control" id="photo" name="photo">
+                            </div>
+                            <div class="mb-3">
+                                <label for="password">Password</label>
+                                <input type="password" class="form-control" id="password" th:field="*{password}" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Register</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

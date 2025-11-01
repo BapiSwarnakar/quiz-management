@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/main}">
+<head>
+    <title>Profile</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <img th:if="${user.photoUrl}" th:src="${user.photoUrl}" class="rounded-circle mb-3" style="width: 150px; height: 150px;">
+                        <h4 th:text="${user.name}">User Name</h4>
+                        <p th:text="${user.email}">email@example.com</p>
+                        <a href="/profile/edit" class="btn btn-primary">Edit Profile</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">Quiz History</div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Quiz</th>
+                                        <th>Score</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="result : ${quizResults}">
+                                        <td th:text="${result.quiz.title}">Quiz Title</td>
+                                        <td th:text="${result.obtainedMarks + '/' + result.totalMarks}">Score</td>
+                                        <td th:text="${#temporals.format(result.endTime, 'dd-MM-yyyy HH:mm')}">Date</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

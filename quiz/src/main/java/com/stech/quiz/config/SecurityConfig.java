@@ -1,0 +1,1 @@
+// This file has been removed to avoid duplication with com.stech.quiz.security.SecurityConfig

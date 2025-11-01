@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/main}">
+<head>
+    <title>Activity Dashboard</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">Recent Activities</div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Activity</th>
+                                        <th>Time</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="activity : ${activities}">
+                                        <td>
+                                            <a th:href="@{/admin/activity/user/{id}(id=${activity.user.id})}" 
+                                               th:text="${activity.user.name}">User</a>
+                                        </td>
+                                        <td th:text="${activity.activityType}">Activity</td>
+                                        <td th:text="${#temporals.format(activity.timestamp, 'dd-MM-yyyy HH:mm')}">Time</td>
+                                        <td th:text="${activity.description}">Details</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

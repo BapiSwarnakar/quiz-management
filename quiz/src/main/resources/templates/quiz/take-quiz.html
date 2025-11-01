@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Take Quiz</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between">
+                <h3 th:text="${quiz.title}">Quiz Title</h3>
+                <div id="timer" class="badge bg-primary"></div>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/quiz/submit/{id}(id=${quiz.id})}" method="post">
+                    <div th:each="question, stat : ${quiz.questions}" class="mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 th:text="${stat.count + '. ' + question.content}">Question</h5>
+                                <div th:each="answer : ${question.answers}" class="form-check">
+                                    <input type="radio" class="form-check-input"
+                                           th:name="'q' + ${question.id}"
+                                           th:value="${answer.id}"
+                                           th:id="'answer-' + ${answer.id}">
+                                    <label class="form-check-label" 
+                                           th:for="'answer-' + ${answer.id}"
+                                           th:text="${answer.content}">Answer</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit Quiz</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        const quizTime = /*[[${quiz.timeInMinutes}]]*/ 30;
+        let timeLeft = quizTime * 60;
+        
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timer').textContent = 
+                `Time Left: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeLeft === 0) {
+                document.querySelector('form').submit();
+            }
+            timeLeft--;
+        }
+        
+        setInterval(updateTimer, 1000);
+        updateTimer();
+    </script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-QuizManagementApplication<quiz>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.stech.quiz.QuizManagementApplication",
+            "projectName": "quiz",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
