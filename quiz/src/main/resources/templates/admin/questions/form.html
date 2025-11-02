@@ -10,9 +10,8 @@
                 <h3>Add/Edit Question</h3>
             </div>
             <div class="card-body">
-                <form th:action="@{/admin/questions/save}" method="post" th:object="${question}">
+                <form th:action="${question.id != null ? '/admin/questions/update/' + question.id : '/admin/questions/save/' + quiz.id}" method="post" th:object="${question}">
                     <input type="hidden" th:field="*{id}">
-                    <input type="hidden" name="quizId" th:value="${quiz.id}">
                     
                     <div class="mb-3">
                         <label>Question Content</label>
@@ -30,7 +29,7 @@
                                 <input type="text" class="form-control" th:field="*{answers[__${stat.index}__].content}">
                                 <div class="input-group-append">
                                     <div class="input-group-text">
-                                        <input type="radio" name="correctAnswer" th:value="${stat.index}">
+                                        <input type="radio" name="correctAnswerIndex" th:value="${stat.index}">
                                         Correct Answer
                                     </div>
                                 </div>
@@ -56,7 +55,7 @@
                         <input type="text" class="form-control" name="answers[${answerCount}].content" required>
                         <div class="input-group-append">
                             <div class="input-group-text">
-                                <input type="radio" name="correctAnswer" value="${answerCount}">
+                                <input type="radio" name="correctAnswerIndex" value="${answerCount}">
                                 Correct Answer
                             </div>
                         </div>
