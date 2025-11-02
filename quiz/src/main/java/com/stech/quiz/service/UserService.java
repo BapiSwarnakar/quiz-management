@@ -26,6 +26,10 @@ public class UserService {
             .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
     public long getUserCount() {
         return userRepository.count();
     }
@@ -34,8 +38,17 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    public User findUserById(Long id) {
+        return userRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+    }
+
     public void deleteUserById(Long userId) {
         userRepository.deleteById(userId);
+    }
+
+    public User updateUser(User user) {
+        return userRepository.save(user);
     }
 
     public User getCurrentUser() {

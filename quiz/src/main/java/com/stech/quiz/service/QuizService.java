@@ -44,6 +44,15 @@ public class QuizService {
         return quizRepository.findAll();
     }
 
+    public Quiz findQuizById(Long id) {
+        return quizRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Quiz not found with id: " + id));
+    }
+
+    public Quiz saveQuiz(Quiz quiz) {
+        return quizRepository.save(quiz);
+    }
+
     public void deleteQuizById(Long quizId) {
         quizRepository.deleteById(quizId);
     }
