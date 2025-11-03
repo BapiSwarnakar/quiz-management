@@ -14,8 +14,13 @@
                     <input type="hidden" th:field="*{id}">
                     
                     <div class="mb-3">
-                        <label>Question Content</label>
-                        <textarea class="form-control" th:field="*{content}" rows="3" required></textarea>
+                        <label>Title</label>
+                        <input type="text" class="form-control" th:field="*{title}" placeholder="Enter question title" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Description</label>
+                        <textarea class="form-control" th:field="*{content}" rows="3" placeholder="Describe the question" required></textarea>
                     </div>
                     
                     <div class="mb-3">
@@ -25,46 +30,24 @@
                     
                     <div id="answers-container">
                         <div class="mb-3" th:each="answer, stat : *{answers}">
+                            <input type="hidden" th:field="*{answers[__${stat.index}__].id}">
                             <div class="input-group">
-                                <input type="text" class="form-control" th:field="*{answers[__${stat.index}__].content}">
+                                <input type="text" class="form-control" th:field="*{answers[__${stat.index}__].content}" placeholder="Option [[${stat.index}+1]]">
                                 <div class="input-group-append">
                                     <div class="input-group-text">
-                                        <input type="radio" name="correctAnswerIndex" th:value="${stat.index}">
-                                        Correct Answer
+                                        <input type="radio" name="correctAnswerIndex" th:value="${stat.index}"
+                                               th:checked="${question.correctAnswer != null and answer.id != null and question.correctAnswer.id == answer.id}">
+                                        Correct
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <button type="button" class="btn btn-secondary mb-3" onclick="addAnswer()">Add Answer Option</button>
                     <button type="submit" class="btn btn-primary">Save Question</button>
                 </form>
             </div>
         </div>
     </div>
     
-    <script th:inline="javascript">
-        function addAnswer() {
-            const container = document.getElementById('answers-container');
-            const answerCount = container.children.length;
-            
-            const newAnswer = `
-                <div class="mb-3">
-                    <div class="input-group">
-                        <input type="text" class="form-control" name="answers[${answerCount}].content" required>
-                        <div class="input-group-append">
-                            <div class="input-group-text">
-                                <input type="radio" name="correctAnswerIndex" value="${answerCount}">
-                                Correct Answer
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            container.insertAdjacentHTML('beforeend', newAnswer);
-        }
-    </script>
 </body>
 </html>
