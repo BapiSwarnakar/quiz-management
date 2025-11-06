@@ -13,12 +13,17 @@
                 <div th:each="question, stat : ${result.quiz.questions}" class="mb-4">
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title" th:text="${stat.count + '. ' + question.content}">Question</h5>
-                            <div th:each="answer : ${question.answers}" 
-                                 th:class="${'form-check ' + 
-                                           (answer.id == answers.get(question.id) ? 
-                                           (answer.id == question.correctAnswer.id ? 'text-success' : 'text-danger') : '') +
-                                           (answer.id == question.correctAnswer.id ? ' fw-bold' : '')}">
+                            <h5 class="card-title mb-2">
+                                <span th:text="${stat.count + '. ' + question.content}">Question</span>
+                                <span class="badge ms-2"
+                                      th:classappend="${answers.get(question.id) == null ? ' bg-secondary' : (answers.get(question.id) == question.correctAnswer.id ? ' bg-success' : ' bg-danger')}"
+                                      th:text="${answers.get(question.id) == null ? 'Not attempted' : (answers.get(question.id) == question.correctAnswer.id ? 'Correct' : 'Incorrect')}">
+                                </span>
+                            </h5>
+                            <div th:each="answer : ${question.answers}"
+                                 th:class="${'form-check ' +
+                                           (answer.id == question.correctAnswer.id ? 'text-success fw-bold ' : '') +
+                                           (answers.get(question.id) != null && answer.id == answers.get(question.id) && answer.id != question.correctAnswer.id ? 'text-danger ' : '')}">
                                 <label class="form-check-label" th:text="${answer.content}">Answer</label>
                             </div>
                         </div>

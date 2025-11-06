@@ -3,17 +3,21 @@ package com.stech.quiz.service;
 import com.stech.quiz.entity.*;
 import com.stech.quiz.repository.QuizRepository;
 import com.stech.quiz.repository.QuizResultRepository;
+import com.stech.quiz.repository.QuizAttemptRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
+import java.util.Comparator;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class QuizService {
     private final QuizRepository quizRepository;
     private final QuizResultRepository resultRepository;
+    private final QuizAttemptRepository attemptRepository;
 
     public List<Quiz> getActiveQuizzes() {
         return quizRepository.findByActive(true);
@@ -66,8 +70,20 @@ public class QuizService {
         return getResult(resultId);
     }
 
-    public Map<String, String> getUserAnswers(Long resultId) {
-        // TODO: Implement user answers retrieval logic
-        return Map.of();
+    public Map<Long, Long> getUserAnswers(Long resultId) {
+        QuizResult result = getResult(resultId);
+        Long userId = result.getUser().getId();
+        Long quizId = result.getQuiz().getId();
+
+        // Find user's attempts and select the most relevant completed attempt for this quiz
+        List<QuizAttempt> attempts = attemptRepository.findByUserId(userId);
+        QuizAttempt matched = attempts.stream()
+            .filter(a -> a.getQuiz() != null && Objects.equals(a.getQuiz().getId(), quizId))
+            .filter(a -> a.isCompleted() && a.getEndTime() != null)
+            .sorted(Comparator.comparing(QuizAttempt::getEndTime).reversed())
+            .findFirst()
+            .orElse(null);
+
+        return matched != null && matched.getUserAnswers() != null ? matched.getUserAnswers() : java.util.Collections.emptyMap();
     }
 }
