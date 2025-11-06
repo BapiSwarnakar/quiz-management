@@ -86,8 +86,20 @@ public class QuizAttemptController {
                                                       @RequestParam String nav,
                                                       HttpServletRequest request) {
         attemptService.saveAnswer(attemptId, questionId, answerId);
-        // For AJAX we simply return 200 OK; client will load the next fragment itself
-        return ResponseEntity.ok().build();
+        // If AJAX, return 200 OK; client will load the next fragment itself
+        boolean ajax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
+        if (ajax) {
+            return ResponseEntity.ok().build();
+        }
+        // Non-AJAX fallback: redirect to next/prev question
+        int nextIndex = "next".equalsIgnoreCase(nav) ? index + 1 : index - 1;
+        QuizAttempt attempt = attemptService.getAttempt(attemptId);
+        int total = attempt.getQuiz().getQuestions().size();
+        if (nextIndex < 1) nextIndex = 1;
+        if (nextIndex > total) nextIndex = total;
+        return ResponseEntity.status(302)
+                .header("Location", "/quiz/attempt/" + attemptId + "/q/" + nextIndex)
+                .build();
     }
 
     @PostMapping("/submit/{attemptId}")
