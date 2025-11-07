@@ -16,14 +16,14 @@
                             <h5 class="card-title mb-2">
                                 <span th:text="${stat.count + '. ' + question.content}">Question</span>
                                 <span class="badge ms-2"
-                                      th:classappend="${answers.get(question.id) == null ? ' bg-secondary' : (answers.get(question.id) == question.correctAnswer.id ? ' bg-success' : ' bg-danger')}"
-                                      th:text="${answers.get(question.id) == null ? 'Not attempted' : (answers.get(question.id) == question.correctAnswer.id ? 'Correct' : 'Incorrect')}">
+                                      th:classappend="${(answers != null and answers.get(question.id) != null) ? ((question.correctAnswer != null and answers.get(question.id) == question.correctAnswer.id) ? ' bg-success' : ' bg-danger') : ' bg-secondary'}"
+                                      th:text="${(answers != null and answers.get(question.id) != null) ? ((question.correctAnswer != null and answers.get(question.id) == question.correctAnswer.id) ? 'Correct' : 'Incorrect') : 'Not attempted'}">
                                 </span>
                             </h5>
                             <div th:each="answer : ${question.answers}"
-                                 th:class="${'form-check ' +
-                                           (answer.id == question.correctAnswer.id ? 'text-success fw-bold ' : '') +
-                                           (answers.get(question.id) != null && answer.id == answers.get(question.id) && answer.id != question.correctAnswer.id ? 'text-danger ' : '')}">
+                                 class="form-check"
+                                 th:classappend="${(question.correctAnswer != null and answer.id == question.correctAnswer.id ? ' text-success fw-bold' : '') +
+                                                  ((answers != null and answers.get(question.id) != null and answer.id == answers.get(question.id) and (question.correctAnswer == null or answer.id != question.correctAnswer.id)) ? ' text-danger' : '')}">
                                 <label class="form-check-label" th:text="${answer.content}">Answer</label>
                             </div>
                         </div>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin}">
+<head>
+    <title th:text="${role.id} ? 'Edit Role' : 'Add New Role'">Role Form</title>
+</head>
+<body>
+<div layout:fragment="adminContent">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 th:text="${role.id} ? 'Edit Role' : 'Add New Role'"></h2>
+        <a th:href="@{/admin/roles}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${success}" class="alert alert-success" role="alert">
+        <span th:text="${success}"></span>
+    </div>
+    <div th:if="${error}" class="alert alert-danger" role="alert">
+        <span th:text="${error}"></span>
+    </div>
+
+    <!-- Role Form -->
+    <div class="card">
+        <div class="card-body">
+            <form th:action="${role.id} ? @{/admin/roles/update/} + ${role.id} : @{/admin/roles/save}"
+                  th:object="${role}" method="post" id="roleForm">
+                <input type="hidden" th:field="*{id}" />
+                
+                <div class="mb-3">
+                    <label for="name" class="form-label">Role Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="name" th:field="*{name}"
+                           th:classappend="${#fields.hasErrors('name')} ? 'is-invalid' : ''" required>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                    <div class="form-text">Enter a unique name for the role (e.g., 'ADMIN', 'USER')</div>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a th:href="@{/admin/roles}" class="btn btn-outline-secondary me-md-2">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> 
+                        <span th:text="${role.id} ? 'Update Role' : 'Save Role'"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Include any additional scripts here -->
+<div layout:fragment="scripts">
+    <script th:inline="javascript">
+        // Client-side validation and AJAX name check
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('roleForm');
+            const nameInput = document.getElementById('name');
+            const roleId = document.querySelector('input[name="id"]')?.value;
+            
+            // Check if role name already exists
+            nameInput.addEventListener('blur', function() {
+                const name = this.value.trim();
+                if (name) {
+                    fetch(`/admin/roles/check-name?name=${encodeURIComponent(name)}&id=${roleId || ''}`)
+                        .then(response => response.json())
+                        .then(available => {
+                            if (!available) {
+                                this.setCustomValidity('A role with this name already exists.');
+                                this.reportValidity();
+                            } else {
+                                this.setCustomValidity('');
+                            }
+                        });
+                }
+            });
+            
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    </script>
+</div>
+</body>
+</html>

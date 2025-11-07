@@ -26,8 +26,23 @@ public class UserPrincipal implements UserDetails {
     }
 
     public static UserPrincipal create(User user) {
+        // Get roles and permissions
         List<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
+                .flatMap(role -> {
+                    // Add the role itself as an authority
+                    List<GrantedAuthority> roleAuthorities = new java.util.ArrayList<>();
+                    roleAuthorities.add(new SimpleGrantedAuthority(role.getName()));
+                    
+                    // Add all permissions from the role as authorities
+                    if (role.getPermissions() != null) {
+                        role.getPermissions().stream()
+                            .map(permission -> new SimpleGrantedAuthority(permission.getName()))
+                            .forEach(roleAuthorities::add);
+                    }
+                    
+                    return roleAuthorities.stream();
+                })
+                .distinct()
                 .collect(Collectors.toList());
 
         return new UserPrincipal(

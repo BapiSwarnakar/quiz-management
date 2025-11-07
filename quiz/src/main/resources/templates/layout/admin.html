@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Admin</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <style>
+        body { background: #f3f7f6; }
+        .admin-shell { display: flex; min-height: calc(100vh - 120px); }
+        .sidebar {
+            width: 260px;
+            background: #f3f7f6;
+            border-right: 1px solid #e0e6e5;
+            position: sticky;
+            top: 0;
+            height: calc(100vh - 120px);
+            padding: 16px 12px;
+            overflow-y: auto;
+        }
+        .brand { display: flex; align-items: center; gap: 10px; padding: 8px 10px; margin-bottom: 8px; }
+        .brand .logo { width: 28px; height: 28px; border-radius: 50%; background: #16a085; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; }
+        .brand .name { font-weight: 700; letter-spacing: .5px; color: #16a085; }
+        .nav-section-title { font-size: .8rem; color: #8aa5a1; text-transform: uppercase; padding: 8px 12px; margin-top: 8px; }
+        .menu { list-style: none; padding: 0; margin: 0; }
+        .menu-item > a { display: flex; align-items: center; gap: 12px; padding: 10px 12px; color: #1d2b2a; text-decoration: none; border-radius: 8px; }
+        .menu-item > a:hover, .menu-item > a.active { background: #e7f4f1; color: #16a085; }
+        .menu-icon { width: 22px; display: inline-flex; align-items: center; justify-content: center; color: #16a085; }
+        .submenu-toggle { margin-left: auto; color: #16a085; font-weight: 700; }
+        .submenu { padding-left: 34px; }
+        .submenu a { display: block; padding: 8px 12px; color: #3a4a49; text-decoration: none; border-radius: 6px; }
+        .submenu a:hover, .submenu a.active { background: #eaf7f4; color: #16a085; }
+        .content { flex: 1; padding-left: 24px; }
+        @media (max-width: 991.98px) {
+            .sidebar { position: relative; height: auto; width: 100%; }
+            .content { padding-left: 0; margin-top: 12px; }
+        }
+    </style>
+
+    <div class="admin-shell">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo">Q</div>
+                <div class="name">Quiz Admin</div>
+            </div>
+
+            <div class="nav-section-title">Navigation</div>
+            <ul class="menu">
+                <li class="menu-item" sec:authorize="hasRole('ROLE_ADMIN') or hasAuthority('DASHBOARD_VIEW')">
+                    <a href="/admin/dashboard" th:classappend="${active == 'dashboard'} ? ' active'">
+                        <span class="menu-icon"><i class="bi bi-speedometer2"></i></span>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="menu-item" sec:authorize="hasRole('ROLE_ADMIN') or hasAnyAuthority('USER_VIEW', 'USER_CREATE', 'USER_EDIT', 'USER_DELETE')">
+                    <a data-bs-toggle="collapse" href="#usersMenu" role="button" aria-expanded="true" aria-controls="usersMenu">
+                        <span class="menu-icon"><i class="bi bi-people"></i></span>
+                        <span>Users</span>
+                        <span class="submenu-toggle">+</span>
+                    </a>
+                    <div class="collapse show" id="usersMenu">
+                        <div class="submenu">
+                            <a href="/admin/users" 
+                               th:classappend="${active == 'users'} ? ' active'"
+                               sec:authorize="hasRole('ROLE_ADMIN') or hasAuthority('USER_VIEW')">
+                                All Users
+                            </a>
+                            <a href="/admin/users/new"
+                               sec:authorize="hasRole('ROLE_ADMIN') or hasAuthority('USER_CREATE')">
+                                Create User
+                            </a>
+                        </div>
+                    </div>
+                </li>
+                <li class="menu-item" sec:authorize="hasRole('ROLE_ADMIN') or hasAnyAuthority('QUIZ_VIEW', 'QUIZ_CREATE', 'QUIZ_EDIT', 'QUIZ_DELETE')">
+                    <a data-bs-toggle="collapse" href="#quizzesMenu" role="button" aria-expanded="true" aria-controls="quizzesMenu">
+                        <span class="menu-icon"><i class="bi bi-ui-checks-grid"></i></span>
+                        <span>Quizzes</span>
+                        <span class="submenu-toggle">+</span>
+                    </a>
+                    <div class="collapse show" id="quizzesMenu">
+                        <div class="submenu">
+                            <a href="/admin/quizzes" 
+                               th:classappend="${active == 'quizzes'} ? ' active'"
+                               sec:authorize="hasRole('ROLE_ADMIN') or hasAuthority('QUIZ_VIEW')">
+                                All Quizzes
+                            </a>
+                            <a href="/admin/quizzes/create"
+                               sec:authorize="hasRole('ROLE_ADMIN') or hasAuthority('QUIZ_CREATE')">
+                                Create Quiz
+                            </a>
+                        </div>
+                    </div>
+                </li>
+                <li class="menu-item" sec:authorize="hasRole('ROLE_ADMIN') or hasAnyAuthority('CATEGORY_VIEW', 'CATEGORY_CREATE', 'CATEGORY_EDIT', 'CATEGORY_DELETE')">
+                    <a data-bs-toggle="collapse" href="#categoriesMenu" role="button" aria-expanded="true" aria-controls="categoriesMenu">
+                        <span class="menu-icon"><i class="bi bi-tags"></i></span>
+                        <span>Categories</span>
+                        <span class="submenu-toggle">+</span>
+                    </a>
+                    <div class="collapse show" id="categoriesMenu">
+                        <div class="submenu">
+                            <a href="/admin/categories" 
+                               th:classappend="${active == 'categories'} ? ' active'"
+                               sec:authorize="hasRole('ROLE_ADMIN') or hasAuthority('CATEGORY_VIEW')">
+                                All Categories
+                            </a>
+                            <a href="/admin/categories/create"
+                               sec:authorize="hasRole('ROLE_ADMIN') or hasAuthority('CATEGORY_CREATE')">
+                                Create Category
+                            </a>
+                        </div>
+                    </div>
+                </li>
+                <li class="menu-item" sec:authorize="hasRole('ROLE_ADMIN') or hasAnyAuthority('REPORT_VIEW', 'REPORT_EXPORT')">
+                    <a data-bs-toggle="collapse" href="#reportsMenu" role="button" aria-expanded="true" aria-controls="reportsMenu">
+                        <span class="menu-icon"><i class="bi bi-graph-up"></i></span>
+                        <span>Reports</span>
+                        <span class="submenu-toggle">+</span>
+                    </a>
+                    <div class="collapse show" id="reportsMenu">
+                        <div class="submenu">
+                            <a href="/admin/reports" 
+                               th:classappend="${active == 'reports'} ? ' active'" 
+                               sec:authorize="hasRole('ROLE_ADMIN') or hasAuthority('REPORT_VIEW')">
+                                Overview
+                            </a>
+                            <a href="/admin/reports/performance" 
+                               sec:authorize="hasRole('ROLE_ADMIN') or hasAuthority('REPORT_VIEW')">
+                                Performance
+                            </a>
+                            <div class="dropdown-divider" sec:authorize="hasAnyAuthority('REPORT_VIEW', 'REPORT_EXPORT')"></div>
+                            <a href="/admin/reports/export" 
+                               sec:authorize="hasRole('ROLE_ADMIN') or hasAuthority('REPORT_EXPORT')">
+                                <i class="bi bi-download"></i> Export Data
+                            </a>
+                        </div>
+                    </div>
+                </li>
+                <li class="menu-item">
+                    <a data-bs-toggle="collapse" href="#securityMenu" role="button" aria-expanded="false" aria-controls="securityMenu">
+                        <span class="menu-icon"><i class="bi bi-shield-lock"></i></span>
+                        <span>Security</span>
+                        <span class="submenu-toggle">+</span>
+                    </a>
+                    <div class="collapse" id="securityMenu">
+                        <div class="submenu">
+                            <a href="/admin/roles" 
+                               th:classappend="${active == 'roles'} ? ' active'"
+                               sec:authorize="hasRole('ROLE_ADMIN') or hasAuthority('ROLE_VIEW')">
+                                Roles
+                            </a>
+                            <a href="/admin/roles/create" 
+                               sec:authorize="hasRole('ROLE_ADMIN') or hasAuthority('ROLE_CREATE')">
+                                Create Role
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="/admin/permissions" 
+                               th:classappend="${active == 'permissions'} ? ' active'"
+                               sec:authorize="hasRole('ROLE_ADMIN') or hasAuthority('PERMISSION_VIEW')">
+                                Permissions
+                            </a>
+                            <a href="/admin/permissions/create" 
+                               sec:authorize="hasRole('ROLE_ADMIN') or hasAuthority('PERMISSION_CREATE')">
+                                Create Permission
+                            </a>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </aside>
+
+        <main class="content mt-4">
+            <div layout:fragment="adminContent"></div>
+        </main>
+    </div>
+</div>
+</body>
+</html>
