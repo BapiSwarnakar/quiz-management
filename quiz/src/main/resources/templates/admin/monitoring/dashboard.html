@@ -3,45 +3,407 @@
 <head>
     <title>System Monitoring</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <style>
+        .metric-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid #16a085;
+        }
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #16a085;
+        }
+        .metric-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .status-up { background-color: #28a745; }
+        .status-warning { background-color: #ffc107; }
+        .status-down { background-color: #dc3545; }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .animate-spin {
+            animation: spin 0.7s linear infinite;
+        }
+    </style>
 </head>
 <body>
     <div layout:fragment="adminContent">
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card mb-4">
-                    <div class="card-header">Quiz Activity</div>
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">System Monitoring</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <div class="btn-group me-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="exportBtn" title="Export data as CSV">
+                        <i class="bi bi-download me-1"></i> Export
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="refreshBtn" title="Refresh dashboard">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metrics Overview -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-4">
+                <div class="card h-100 metric-card">
                     <div class="card-body">
-                        <canvas id="quizActivityChart"></canvas>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-2 text-muted">Active Users</h6>
+                                <h2 class="metric-value" th:text="${metrics.activeUsers}">0</h2>
+                            </div>
+                            <div class="bg-light p-3 rounded">
+                                <i class="bi bi-people-fill text-primary" style="font-size: 1.5rem;"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="card mb-4">
-                    <div class="card-header">System Health</div>
+            <div class="col-md-3 mb-4">
+                <div class="card h-100 metric-card">
                     <div class="card-body">
-                        <div id="healthStatus"></div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-2 text-muted">Quizzes Today</h6>
+                                <h2 class="metric-value" th:text="${metrics.quizzesToday}">0</h2>
+                            </div>
+                            <div class="bg-light p-3 rounded">
+                                <i class="bi bi-ui-checks text-success" style="font-size: 1.5rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card h-100 metric-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-2 text-muted">Avg. Response Time</h6>
+                                <h2 class="metric-value" th:text="${metrics.avgResponseTime} + 'ms'">0ms</h2>
+                            </div>
+                            <div class="bg-light p-3 rounded">
+                                <i class="bi bi-speedometer2 text-info" style="font-size: 1.5rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card h-100 metric-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-2 text-muted">System Status</h6>
+                                <h4 class="mb-0">
+                                    <span class="status-indicator status-up"></span>
+                                    <span>Operational</span>
+                                </h4>
+                            </div>
+                            <div class="bg-light p-3 rounded">
+                                <i class="bi bi-check-circle-fill text-success" style="font-size: 1.5rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row">
+            <div class="col-md-8 mb-4">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Quiz Activity (Last 7 Days)</span>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-secondary active">Week</button>
+                            <button class="btn btn-outline-secondary">Month</button>
+                            <button class="btn btn-outline-secondary">Year</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="quizActivityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">System Resources</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>CPU Usage</span>
+                                <span th:text="${metrics.cpuUsage} + '%'">0%</span>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-success" role="progressbar" 
+                                     th:style="'width: ' + ${metrics.cpuUsage} + '%'" 
+                                     th:classappend="${metrics.cpuUsage > 80} ? 'bg-warning' : 'bg-success'">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Memory Usage</span>
+                                <span th:text="${metrics.memoryUsage} + ' MB (' + ${metrics.memoryUsagePercent} + '%)'">0 MB (0%)</span>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-info" role="progressbar" 
+                                     th:style="'width: ' + ${metrics.memoryUsagePercent} + '%'"
+                                     th:classappend="${metrics.memoryUsagePercent > 80} ? 'bg-warning' : 'bg-info'">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Disk Usage</span>
+                                <span th:text="${metrics.diskUsage} + ' GB (' + ${metrics.diskUsagePercent} + '%)'">0 GB (0%)</span>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-primary" role="progressbar" 
+                                     th:style="'width: ' + ${metrics.diskUsagePercent} + '%'"
+                                     th:classappend="${metrics.diskUsagePercent > 80} ? 'bg-danger' : 'bg-primary'">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">Recent Activities</div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Event</th>
+                                        <th>User</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="activity : ${recentActivities}">
+                                        <td th:text="${#temporals.format(activity.timestamp, 'yyyy-MM-dd HH:mm')}">2023-01-01 12:00</td>
+                                        <td th:text="${activity.event}">User login</td>
+                                        <td th:text="${activity.user}">admin@example.com</td>
+                                        <td>
+                                            <span class="badge bg-success" th:if="${activity.status == 'SUCCESS'}">Success</span>
+                                            <span class="badge bg-warning" th:if="${activity.status == 'WARNING'}">Warning</span>
+                                            <span class="badge bg-danger" th:if="${activity.status == 'ERROR'}">Error</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <script th:inline="javascript">
-            const metrics = /*[[${metrics}]]*/ {};
-            
-            // Initialize charts with metrics data
-            const ctx = document.getElementById('quizActivityChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: metrics.timeLabels,
-                    datasets: [{
-                        label: 'Quizzes Started',
-                        data: metrics.quizStarts
-                    }, {
-                        label: 'Quizzes Completed',
-                        data: metrics.quizCompletions
-                    }]
-                }
+            // Add button event listeners
+            document.addEventListener('DOMContentLoaded', function() {
+                // Handle refresh button click
+                document.getElementById('refreshBtn').addEventListener('click', function() {
+                    // Show loading state
+                    const icon = this.querySelector('i');
+                    const originalClass = icon.className;
+                    icon.className = 'bi bi-arrow-clockwise animate-spin';
+                    
+                    // Reload the page after a short delay to show the loading state
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 300);
+                });
+                
+                // Handle export button click
+                document.getElementById('exportBtn').addEventListener('click', async function() {
+                    const btn = this;
+                    const originalHtml = btn.innerHTML;
+                    
+                    try {
+                        // Show loading state
+                        btn.disabled = true;
+                        btn.innerHTML = `
+                            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                            Exporting...
+                        `;
+                        
+                        // Show toast notification
+                        const toast = document.createElement('div');
+                        toast.className = 'position-fixed bottom-0 end-0 m-3 p-3 bg-primary text-white rounded shadow';
+                        toast.style.zIndex = '1100';
+                        toast.style.transition = 'opacity 0.3s';
+                        toast.innerHTML = `
+                            <div class="d-flex align-items-center">
+                                <div class="spinner-border spinner-border-sm text-light me-2" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <span>Preparing export...</span>
+                            </div>
+                        `;
+                        document.body.appendChild(toast);
+                        
+                        // Trigger the download
+                        const response = await fetch('/admin/monitoring/export');
+                        if (!response.ok) {
+                            throw new Error('Export failed');
+                        }
+                        
+                        // Create a blob from the response and trigger download
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                        a.href = url;
+                        a.download = `monitoring-export-${timestamp}.csv`;
+                        document.body.appendChild(a);
+                        a.click();
+                        
+                        // Clean up
+                        window.URL.revokeObjectURL(url);
+                        a.remove();
+                        
+                        // Update toast to success
+                        toast.innerHTML = `
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                                <span>Export completed successfully!</span>
+                            </div>
+                        `;
+                        toast.className = toast.className.replace('bg-primary', 'bg-success');
+                        
+                    } catch (error) {
+                        console.error('Export failed:', error);
+                        const errorToast = document.createElement('div');
+                        errorToast.className = 'position-fixed bottom-0 end-0 m-3 p-3 bg-danger text-white rounded shadow';
+                        errorToast.style.zIndex = '1100';
+                        errorToast.innerHTML = `
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                <span>Export failed. Please try again.</span>
+                            </div>
+                        `;
+                        document.body.appendChild(errorToast);
+                        
+                        // Remove error toast after 5 seconds
+                        setTimeout(() => {
+                            errorToast.style.opacity = '0';
+                            setTimeout(() => errorToast.remove(), 300);
+                        }, 5000);
+                    } finally {
+                        // Restore button state
+                        btn.disabled = false;
+                        btn.innerHTML = originalHtml;
+                        
+                        // Remove success/loading toast after 3 seconds
+                        if (toast) {
+                            setTimeout(() => {
+                                toast.style.opacity = '0';
+                                setTimeout(() => toast.remove(), 300);
+                            }, 3000);
+                        }
+                    }
+                });
+                
+                // Initialize charts
+                const metrics = /*[[${metrics}]]*/ {};
+                
+                // Quiz Activity Chart
+                const ctx = document.getElementById('quizActivityChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: metrics.timeLabels || [],
+                        datasets: [{
+                            label: 'Quizzes Started',
+                            data: metrics.quizStarts || [],
+                            borderColor: '#4e73df',
+                            backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#4e73df',
+                            pointBorderColor: '#fff',
+                            pointHoverRadius: 5,
+                            pointHoverBackgroundColor: '#4e73df',
+                            pointHoverBorderColor: '#fff',
+                            pointHitRadius: 10,
+                            pointBorderWidth: 2,
+                            fill: true
+                        }, {
+                            label: 'Quizzes Completed',
+                            data: metrics.quizCompletions || [],
+                            borderColor: '#1cc88a',
+                            backgroundColor: 'rgba(28, 200, 138, 0.05)',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#1cc88a',
+                            pointBorderColor: '#fff',
+                            pointHoverRadius: 5,
+                            pointHoverBackgroundColor: '#1cc88a',
+                            pointHoverBorderColor: '#fff',
+                            pointHitRadius: 10,
+                            pointBorderWidth: 2,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                            },
+                        },
+                        scales: {
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Auto-refresh every 5 minutes
+                setInterval(function() {
+                    window.location.reload();
+                }, 300000);
             });
         </script>
     </div>

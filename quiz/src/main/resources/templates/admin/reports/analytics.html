@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin}">
+<head>
+    <title>Analytics Dashboard</title>
+</head>
+<body>
+    <div layout:fragment="adminContent">
+        <!-- Page Heading -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0 text-gray-800">Analytics Dashboard</h1>
+        <div class="d-flex">
+            <div class="dropdown me-2">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                        id="timeframeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-calendar3 me-1"></i>
+                    <span th:if="${timeframe == 7}">Last 7 days</span>
+                    <span th:if="${timeframe == 30}">Last 30 days</span>
+                    <span th:if="${timeframe == 90}">Last 90 days</span>
+                    <span th:if="${timeframe == 365}">This year</span>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="timeframeDropdown">
+                    <li><a class="dropdown-item" th:href="'?timeframe=7'" th:classappend="${timeframe == 7} ? 'active' : ''">Last 7 days</a></li>
+                    <li><a class="dropdown-item" th:href="'?timeframe=30'" th:classappend="${timeframe == 30} ? 'active' : ''">Last 30 days</a></li>
+                    <li><a class="dropdown-item" th:href="'?timeframe=90'" th:classappend="${timeframe == 90} ? 'active' : ''">Last 90 days</a></li>
+                    <li><a class="dropdown-item" th:href="'?timeframe=365'" th:classappend="${timeframe == 365} ? 'active' : ''">This year</a></li>
+                </ul>
+            </div>
+            <button class="btn btn-sm btn-primary" onclick="window.print()">
+                <i class="bi bi-printer me-1"></i> Print
+            </button>
+        </div>
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+        <!-- Quiz Distribution by Category -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Quiz Distribution by Category</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="categoryDistribution"></canvas>
+                    </div>
+                    <div class="mt-4 text-center small">
+                        <span class="me-2">
+                            <i class="fas fa-circle text-primary"></i> General Knowledge
+                        </span>
+                        <span class="me-2">
+                            <i class="fas fa-circle text-success"></i> Science
+                        </span>
+                        <span class="me-2">
+                            <i class="fas fa-circle text-info"></i> History
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Engagement -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">User Engagement</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="userEngagement"></canvas>
+                    </div>
+                    <div class="mt-4 text-center small">
+                        <span class="me-2">
+                            <i class="fas fa-circle text-primary"></i> Active
+                        </span>
+                        <span class="me-2">
+                            <i class="fas fa-circle text-success"></i> Occasional
+                        </span>
+                        <span class="me-2">
+                            <i class="fas fa-circle text-gray-300"></i> Inactive
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+        <!-- Performance Trends -->
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Performance Trends</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="performanceTrends"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Page level scripts -->
+    <script th:inline="javascript">
+        // Set new default font family and font color to mimic Bootstrap's default styling
+        Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+        Chart.defaults.global.defaultFontColor = '#858796';
+    // Set active menu item
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set active menu
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        document.querySelector('a[href$="/admin/reports/analytics"]')?.parentElement.classList.add('active');
+        // Category Distribution Chart
+        var ctx = document.getElementById('categoryDistribution');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ["General Knowledge", "Science", "History", "Geography", "Arts"],
+                datasets: [{
+                    data: [30, 25, 20, 15, 10],
+                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'],
+                    hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf', '#dda20a', '#be2617'],
+                    hoverBorderColor: "rgba(234, 236, 244, 1)",
+                }],
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                cutout: '70%',
+            },
+        });
+
+        // User Engagement Chart
+        var ctx2 = document.getElementById('userEngagement');
+        new Chart(ctx2, {
+            type: 'pie',
+            data: {
+                labels: ["Active", "Occasional", "Inactive"],
+                datasets: [{
+                    data: [45, 30, 25],
+                    backgroundColor: ['#4e73df', '#1cc88a', '#e74a3b'],
+                    hoverBackgroundColor: ['#2e59d9', '#17a673', '#be2617'],
+                    hoverBorderColor: "rgba(234, 236, 244, 1)",
+                }],
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+            },
+        });
+
+        // Performance Trends Chart
+        var ctx3 = document.getElementById('performanceTrends');
+        new Chart(ctx3, {
+            type: 'line',
+            data: {
+                labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                datasets: [{
+                    label: "Avg. Score",
+                    lineTension: 0.3,
+                    backgroundColor: "rgba(78, 115, 223, 0.05)",
+                    borderColor: "rgba(78, 115, 223, 1)",
+                    pointRadius: 3,
+                    pointBackgroundColor: "rgba(78, 115, 223, 1)",
+                    pointBorderColor: "rgba(78, 115, 223, 1)",
+                    pointHoverRadius: 3,
+                    pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+                    pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+                    pointHitRadius: 10,
+                    pointBorderWidth: 2,
+                    data: [65, 69, 72, 75, 77, 80, 82, 83, 82, 84, 85, 86],
+                }],
+            },
+            options: {
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        left: 10,
+                        right: 25,
+                        top: 25,
+                        bottom: 0
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Score: ' + context.raw + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
