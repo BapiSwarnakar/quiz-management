@@ -2,49 +2,229 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/main}">
 <head>
     <title>Edit Profile</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fc;
+        }
+        
+        .card-dashboard {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+            color: white;
+            border-bottom: none;
+            padding: 1.5rem;
+        }
+        
+        .card-header h5 {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control, .form-select {
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            padding: 0.625rem 0.875rem;
+            transition: all 0.2s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+        
+        .form-control[readonly] {
+            background-color: #f8f9fa;
+            cursor: not-allowed;
+        }
+        
+        .profile-photo-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid #e9ecef;
+        }
+        
+        .photo-upload-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .btn-action {
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+            border-radius: 6px;
+            min-width: 120px;
+        }
+        
+        .btn-primary {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0b5ed7;
+        }
+        
+        .btn-outline-secondary {
+            color: #6c757d;
+            border-color: #dee2e6;
+        }
+        
+        .btn-outline-secondary:hover {
+            background-color: #f8f9fc;
+            border-color: #adb5bd;
+            color: #212529;
+        }
+        
+        .form-section {
+            margin-bottom: 2rem;
+        }
+        
+        .form-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .form-divider {
+            border-top: 1px solid #e9ecef;
+            margin: 2rem 0;
+        }
+        
+        @media (max-width: 768px) {
+            .photo-upload-wrapper {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .btn-action {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
 <div layout:fragment="content">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">Edit Profile</div>
-                <div class="card-body">
-                    <form th:action="@{/profile/update}" th:object="${user}" method="post" enctype="multipart/form-data">
-                        <input type="hidden" th:field="*{id}"/>
-                        <div class="mb-3">
-                            <label class="form-label">Name</label>
-                            <input type="text" class="form-control" th:field="*{name}" required/>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" class="form-control" th:field="*{email}" required readonly/>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Mobile</label>
-                            <input type="text" class="form-control" th:field="*{mobile}"/>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Gender</label>
-                            <select class="form-select" th:field="*{gender}">
-                                <option value="" disabled>-- Select --</option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Profile Photo</label>
-                            <div class="d-flex align-items-center gap-3">
-                                <img th:if="*{photoUrl}" th:src="*{photoUrl}" class="rounded" style="width:64px;height:64px;object-fit:cover;">
-                                <input type="file" class="form-control" name="photo" accept="image/*"/>
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="h4 mb-0">Edit Profile</h2>
+                <p class="text-muted mb-0">Update your personal information</p>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card card-dashboard">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h5 class="mb-0">Profile Information</h5>
+                        <i class="bi bi-pencil-square fs-4"></i>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/profile/update}" th:object="${user}" method="post" enctype="multipart/form-data">
+                            <input type="hidden" th:field="*{id}"/>
+                            
+                            <!-- Personal Information Section -->
+                            <div class="form-section">
+                                <h6 class="text-muted text-uppercase mb-3" style="font-size: 0.85rem; letter-spacing: 0.5px;">
+                                    <i class="bi bi-person-fill me-2"></i> Personal Information
+                                </h6>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label" for="name">
+                                        <i class="bi bi-person me-1"></i> Full Name
+                                    </label>
+                                    <input type="text" class="form-control" id="name" th:field="*{name}" required placeholder="Enter your full name"/>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label" for="email">
+                                        <i class="bi bi-envelope me-1"></i> Email Address
+                                    </label>
+                                    <input type="email" class="form-control" id="email" th:field="*{email}" required readonly placeholder="Email cannot be changed"/>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label" for="mobile">
+                                        <i class="bi bi-telephone me-1"></i> Mobile Number
+                                    </label>
+                                    <input type="text" class="form-control" id="mobile" th:field="*{mobile}" placeholder="Enter your mobile number"/>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label" for="gender">
+                                        <i class="bi bi-person-badge me-1"></i> Gender
+                                    </label>
+                                    <select class="form-select" id="gender" th:field="*{gender}">
+                                        <option value="" disabled>-- Select Gender --</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
                             </div>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <a href="/profile" class="btn btn-outline-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-primary">Save Changes</button>
-                        </div>
-                    </form>
+
+                            <div class="form-divider"></div>
+
+                            <!-- Profile Photo Section -->
+                            <div class="form-section">
+                                <h6 class="text-muted text-uppercase mb-3" style="font-size: 0.85rem; letter-spacing: 0.5px;">
+                                    <i class="bi bi-image me-2"></i> Profile Photo
+                                </h6>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Photo</label>
+                                    <div class="photo-upload-wrapper">
+                                        <div th:if="*{photoUrl}">
+                                            <img th:src="*{photoUrl}" class="profile-photo-preview" alt="Current Profile Photo"/>
+                                        </div>
+                                        <div th:unless="*{photoUrl}" class="profile-photo-preview bg-light d-flex align-items-center justify-content-center">
+                                            <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
+                                        </div>
+                                        <div style="flex: 1;">
+                                            <input type="file" class="form-control" name="photo" accept="image/*" id="photoInput"/>
+                                            <small class="text-muted d-block mt-2">
+                                                <i class="bi bi-info-circle me-1"></i>
+                                                Supported formats: JPG, PNG, GIF (Max 5MB)
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-divider"></div>
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="/profile" class="btn btn-outline-secondary btn-action">
+                                    <i class="bi bi-arrow-left me-1"></i> Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary btn-action">
+                                    <i class="bi bi-check-circle me-1"></i> Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer bg-transparent border-top text-end">
+                        <small class="text-muted">Update your profile information to keep your account current</small>
+                    </div>
                 </div>
             </div>
         </div>

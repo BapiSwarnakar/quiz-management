@@ -1,259 +1,426 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/main}">
 <head>
-    <title>Quiz</title>
+    <title>Quiz - <span th:text="${quiz.title}">Quiz Title</span></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fc;
+        }
+        
+        .card-dashboard {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+            color: white;
+            border-bottom: none;
+            padding: 1.5rem;
+        }
+        
+        .card-header h4 {
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .card-header small {
+            opacity: 0.9;
+        }
+        
+        .card-body {
+            padding: 2rem;
+        }
+        
+        .progress {
+            height: 10px;
+            border-radius: 8px;
+            background-color: #e9ecef;
+            margin: 0.5rem 0 1.5rem;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #0d6efd, #0dcaf0);
+            border-radius: 8px;
+        }
+        
+        .question-content {
+            margin-bottom: 2rem;
+        }
+        
+        .question-content h5 {
+            color: #212529;
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .question-content p {
+            color: #6c757d;
+            margin-bottom: 0;
+            line-height: 1.6;
+        }
+        
+        .answer-option {
+            display: block;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .answer-option:hover {
+            border-color: #0d6efd;
+            background-color: rgba(13, 110, 253, 0.03);
+            box-shadow: 0 0.25rem 0.5rem rgba(13, 110, 253, 0.1);
+        }
+        
+        .answer-option.selected {
+            border-color: #0d6efd;
+            background-color: rgba(13, 110, 253, 0.08);
+        }
+        
+        .form-check-input {
+            border-color: #dee2e6;
+        }
+        
+        .form-check-input:checked {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        
+        .form-check-label {
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 0;
+            font-weight: 500;
+        }
+        
+        #timer {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1.25rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-block;
+        }
+        
+        .btn {
+            font-weight: 500;
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0b5ed7;
+        }
+        
+        .btn-outline-secondary {
+            color: #6c757d;
+            border-color: #dee2e6;
+        }
+        
+        .btn-outline-secondary:hover {
+            background-color: #f8f9fc;
+            border-color: #adb5bd;
+            color: #212529;
+        }
+        
+        .btn-outline-danger {
+            color: #dc3545;
+            border-color: #dc3545;
+        }
+        
+        .btn-outline-danger:hover {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+        
+        .navigation-buttons {
+            border-top: 1px solid #e9ecef;
+            padding-top: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
 <div layout:fragment="content">
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <div>
-                <h4 class="mb-0" th:text="${quiz.title}">Quiz Title</h4>
-                <small class="text-muted" th:text="${'Question ' + index + ' of ' + total}"></small>
-            </div>
-            <div id="timer" class="badge bg-primary"></div>
-        </div>
-        <div class="card-body" id="questionContainer" th:fragment="questionBody"
-             th:attr="data-answered=${answeredCount},data-total=${total}">
-            <!-- Progress Overview -->
-            <div class="mb-3">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <small class="text-muted">Progress: <span th:text="${answeredCount}">0</span>/<span th:text="${total}">0</span> answered</small>
+    <div class="container py-4">
+        <div class="card card-dashboard">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-0" th:text="${quiz.title}">Quiz Title</h4>
+                    <small th:text="${'Question ' + index + ' of ' + total}">Question</small>
                 </div>
+                <div id="timer" class="badge bg-primary fs-5"></div>
             </div>
-            <form th:action="@{/quiz/attempt/answer/{attemptId}(attemptId=${attempt.id})}" method="post" id="navForm">
-                <input type="hidden" name="questionId" th:value="${question.id}">
-                <input type="hidden" name="index" th:value="${index}">
-
-                <h5 th:text="${question.title != null and !#strings.isEmpty(question.title) ? question.title : 'Question ' + index}">Question Title</h5>
-                <p class="text-muted" th:if="${question.content}" th:text="${question.content}">Description</p>
-
-                <div th:each="ans : ${answers}" class="form-check mb-2">
-                    <input class="form-check-input" type="radio"
-                           th:id="'ans-' + ${ans.id}" name="answerId" th:value="${ans.id}"
-                           th:checked="${selectedAnswerId != null and selectedAnswerId == ans.id}">
-                    <label class="form-check-label" th:for="'ans-' + ${ans.id}" th:text="${ans.content}">Option</label>
-                </div>
-
-                <div class="d-flex justify-content-between mt-4">
-                    <button type="submit" class="btn btn-outline-secondary btn-prev" name="nav" value="prev" th:attr="data-disabled=${index == 1},disabled=${index == 1}">Previous</button>
-                    <div>
-                        <button type="submit"
-                                class="btn btn-outline-danger me-2 btn-submit-now"
-                                th:formaction="@{/quiz/attempt/submit/{attemptId}(attemptId=${attempt.id})}">
-                            Submit Now
-                        </button>
-                        <button type="submit" class="btn btn-primary btn-next" name="nav" value="next" th:if="${index < total}">Next</button>
+            
+            <div class="card-body" id="questionContainer" th:fragment="questionBody"
+                 th:attr="data-answered=${answeredCount},data-total=${total}">
+                
+                <!-- Progress Overview -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="text-muted">
+                            <i class="bi bi-question-circle me-1"></i>
+                            <span>Question <span th:text="${index}">1</span> of <span th:text="${total}">10</span></span>
+                            <span class="mx-2">•</span>
+                            <i class="bi bi-check-circle me-1"></i>
+                            <span>Answered: <span th:text="${answeredCount}">0</span>/<span th:text="${total}">10</span></span>
+                        </div>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar"
+                             th:if="${total > 0}"
+                             th:style="${'width:' + (answeredCount * 100 / total) + '%'}"
+                             th:attr="aria-valuenow=${answeredCount * 100 / total}"
+                             aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar" role="progressbar"
+                             th:unless="${total > 0}"
+                             style="width:0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                 </div>
-            </form>
-            <script th:inline="javascript">
-                (function(){
-                    const timeLimit = /*[[${quiz.timeInMinutes}]]*/ 30; // minutes
-                    const startTime = new Date(/*[[${attempt.startTime}]]*/).getTime();
 
-                    function autoSubmit() {
-                        const checked = document.querySelector('input[name="answerId"]:checked');
-                        if (checked) {
-                            const hidden = document.querySelector('#submitForm input[name="answerId"]');
-                            if (hidden) hidden.value = checked.value;
-                        }
-                        const form = document.getElementById('submitForm');
-                        if (form) form.submit();
-                    }
+                <form th:action="@{/quiz/attempt/answer/{attemptId}(attemptId=${attempt.id})}" method="post" id="navForm">
+                    <input type="hidden" name="questionId" th:value="${question.id}">
+                    <input type="hidden" name="index" th:value="${index}">
 
-                    function updateTimerLocal() {
-                        const now = new Date().getTime();
-                        const elapsedSec = Math.floor((now - startTime) / 1000);
-                        const remaining = (timeLimit * 60) - elapsedSec;
-                        if (remaining <= 0) {
-                            autoSubmit();
-                            return;
-                        }
-                        const m = Math.floor(remaining / 60);
-                        const s = remaining % 60;
-                        const timerEl = document.getElementById('timer');
-                        if (timerEl) timerEl.textContent = `Time Remaining: ${m}:${s.toString().padStart(2,'0')}`;
-                    }
-                    
-                    // start on load
-                    setInterval(updateTimerLocal, 1000);
-                    updateTimerLocal();
-                })();
-            </script>
-            <form th:action="@{/quiz/attempt/submit/{attemptId}(attemptId=${attempt.id})}" method="post" id="submitForm" class="d-none">
-                <input type="hidden" name="questionId" th:value="${question.id}">
-                <input type="hidden" name="answerId" th:value="${selectedAnswerId}">
-            </form>
+                    <div class="question-content">
+                        <h5 th:text="${question.title != null and !#strings.isEmpty(question.title) ? question.title : 'Question ' + index}">Question Title</h5>
+                        <p th:if="${question.content}" th:text="${question.content}">Description</p>
+                    </div>
+
+                    <div class="answers-container mb-4">
+                        <div th:each="ans : ${answers}" class="answer-option" 
+                             th:classappend="${selectedAnswerId != null and selectedAnswerId == ans.id} ? 'selected' : ''"
+                             onclick="document.getElementById('ans-${ans.id}').click()">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio"
+                                       th:id="'ans-' + ${ans.id}" name="answerId" th:value="${ans.id}"
+                                       th:checked="${selectedAnswerId != null and selectedAnswerId == ans.id}"
+                                       onchange="this.closest('.answer-option').classList.toggle('selected', this.checked);">
+                                <label class="form-check-label" th:for="'ans-' + ${ans.id}" th:text="${ans.content}">Option</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="navigation-buttons">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button type="submit" 
+                                    class="btn btn-outline-secondary btn-prev" 
+                                    name="nav" 
+                                    value="prev"
+                                    th:classappend="${index == 1} ? 'invisible' : ''"
+                                    th:disabled="${index == 1}">
+                                <i class="bi bi-arrow-left me-2"></i>Previous
+                            </button>
+                            
+                            <div class="btn-group">
+                                <button type="submit"
+                                        class="btn btn-outline-danger btn-submit-now"
+                                        th:formaction="@{/quiz/attempt/submit/{attemptId}(attemptId=${attempt.id})}"
+                                        onclick="return confirm('Are you sure you want to submit the quiz? You cannot change your answers after submission.')">
+                                    <i class="bi bi-send-check me-1"></i>Submit Quiz
+                                </button>
+                                <button type="submit" 
+                                        class="btn btn-primary btn-next" 
+                                        name="nav" 
+                                        value="next" 
+                                        th:if="${index < total}">
+                                    Next <i class="bi bi-arrow-right ms-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <form th:action="@{/quiz/attempt/submit/{attemptId}(attemptId=${attempt.id})}" method="post" id="submitForm" class="d-none">
+                    <input type="hidden" name="questionId" th:value="${question.id}">
+                    <input type="hidden" name="answerId" th:value="${selectedAnswerId}">
+                </form>
+            </div>
         </div>
     </div>
-</div>
-<script th:inline="javascript">
-    const timeLimit = /*[[${quiz.timeInMinutes}]]*/ 30; // minutes
-    const startTime = new Date(/*[[${attempt.startTime}]]*/).getTime();
-    // Initial values; progress will recompute from DOM on each render
-    const totalQuestions = /*[[${total}]]*/ 0;
-    const answeredCountInitial = /*[[${answeredCount}]]*/ 0;
-    const attemptId = /*[[${attempt.id}]]*/ 0;
-    const currentIndex = /*[[${index}]]*/ 1;
 
-    function updateTimer() {
-        const now = new Date().getTime();
-        const elapsedSec = Math.floor((now - startTime) / 1000);
-        const remaining = (timeLimit * 60) - elapsedSec;
-        if (remaining <= 0) {
-            autoSubmit();
-            return;
-        }
-        const m = Math.floor(remaining / 60);
-        const s = remaining % 60;
-        const timerEl = document.getElementById('timer');
-        if (timerEl) {
-            timerEl.textContent = `Time Remaining: ${m}:${s.toString().padStart(2,'0')}`;
-        }
-        const timeTextEl = document.getElementById('timeText');
-        if (timeTextEl) {
-            timeTextEl.textContent = `Time Remaining: ${m}:${s.toString().padStart(2,'0')}`;
-        }
-        const timePct = Math.max(0, Math.min(100, Math.round((elapsedSec / (timeLimit * 60)) * 100)));
-        const timeProgressEl = document.getElementById('timeProgress');
-        if (timeProgressEl) {
-            timeProgressEl.style.width = `${timePct}%`;
-        }
-    }
-    function autoSubmit() {
-        // copy selected answer to submit form
-        const checked = document.querySelector('input[name="answerId"]:checked');
-        if (checked) {
-            document.querySelector('#submitForm input[name="answerId"]').value = checked.value;
-        }
-        document.getElementById('submitForm').submit();
-    }
-    function updateQuestionProgress() {
-        const container = document.getElementById('questionContainer');
-        let answered = answeredCountInitial;
-        let total = totalQuestions;
-        if (container) {
-            const a = container.getAttribute('data-answered');
-            const t = container.getAttribute('data-total');
-            if (a) answered = parseInt(a, 10);
-            if (t) total = parseInt(t, 10);
-        }
-        if (total > 0) {
-            const pct = Math.max(0, Math.min(100, Math.round((answered / total) * 100)));
-            const qp = document.getElementById('questionProgress');
-            if (qp) {
-                qp.style.width = `${pct}%`;
+    <script th:inline="javascript">
+        const timeLimit = /*[[${quiz.timeInMinutes}]]*/ 30;
+        const startTime = new Date(/*[[${attempt.startTime}]]*/).getTime();
+        const attemptId = /*[[${attempt.id}]]*/ 0;
+
+        function updateTimer() {
+            const now = new Date().getTime();
+            const elapsedSec = Math.floor((now - startTime) / 1000);
+            const remaining = (timeLimit * 60) - elapsedSec;
+            
+            const m = Math.max(0, Math.floor(remaining / 60));
+            const s = Math.max(0, remaining % 60);
+            const timeString = `${m}:${s.toString().padStart(2, '0')}`;
+            
+            const timerEl = document.getElementById('timer');
+            if (timerEl) {
+                timerEl.textContent = "Time Remaining: "+timeString;
+                
+                if (remaining <= 60) {
+                    timerEl.classList.remove('bg-primary', 'bg-warning');
+                    timerEl.classList.add('bg-danger');
+                } else if (remaining <= 180) {
+                    timerEl.classList.remove('bg-primary', 'bg-danger');
+                    timerEl.classList.add('bg-warning', 'text-dark');
+                } else {
+                    timerEl.classList.remove('bg-warning', 'bg-danger', 'text-dark');
+                    timerEl.classList.add('bg-primary');
+                }
+            }
+            
+            if (remaining <= 0) {
+                autoSubmit();
             }
         }
-    }
-    function getCsrf() {
-        const meta = document.querySelector('meta[name="_csrf"]');
-        const headerMeta = document.querySelector('meta[name="_csrf_header"]');
-        return meta && headerMeta ? {name: headerMeta.getAttribute('content'), value: meta.getAttribute('content')} : null;
-    }
-    // jQuery-based navigation (delegated handlers)
-    (function($){
-        function postAnswer(direction) {
-            const $form = $('#navForm');
-            const data = {
-                questionId: $form.find('input[name="questionId"]').val(),
-                answerId: $('input[name="answerId"]:checked').val(),
-                index: $form.find('input[name="index"]').val(),
-                nav: direction
-            };
-            const csrf = getCsrf();
-            return $.ajax({
-                url: `/quiz/attempt/answer/${attemptId}`,
-                method: 'POST',
-                data: $.param(data),
-                headers: csrf ? {[csrf.name]: csrf.value, 'X-Requested-With': 'XMLHttpRequest'} : {'X-Requested-With': 'XMLHttpRequest'}
-            });
+
+        function autoSubmit() {
+            const checked = document.querySelector('input[name="answerId"]:checked');
+            if (checked) {
+                document.querySelector('#submitForm input[name="answerId"]').value = checked.value;
+            }
+            document.getElementById('submitForm').submit();
         }
-        function loadFragment(idx) {
-            return $.ajax({
-                url: `/quiz/attempt/${attemptId}/q/${idx}/fragment`,
-                method: 'GET',
-                headers: {'X-Requested-With': 'XMLHttpRequest'}
-            });
+
+        function getCsrf() {
+            const meta = document.querySelector('meta[name="_csrf"]');
+            const headerMeta = document.querySelector('meta[name="_csrf_header"]');
+            return meta && headerMeta ? {name: headerMeta.getAttribute('content'), value: meta.getAttribute('content')} : null;
         }
-        function nav(direction) {
-            const $form = $('#navForm');
-            let idx = parseInt($form.find('input[name="index"]').val(), 10);
-            idx = direction === 'next' ? idx + 1 : idx - 1;
-            postAnswer(direction)
-                .done(function(){
-                    loadFragment(idx)
-                        .done(function(html){
-                            const $container = $('#questionContainer');
-                            if ($container.length) {
-                                $container.replaceWith(html);
-                                updateQuestionProgress();
-                                if (typeof $.fn.setCountDownTimer === 'function') {
-                                    $('.counter').setCountDownTimer({
-                                        time: "00:01:00",
-                                        button: $('#timer-action'),
-                                        countDownText: 'Remaining time:',
-                                        afterCountText: "Time's up!"
-                                    });
-                                }
-                            } else {
-                                window.location.href = `/quiz/attempt/${attemptId}/q/${idx}`;
-                            }
-                        })
-                        .fail(function(){
-                            window.location.href = `/quiz/attempt/${attemptId}/q/${idx}`;
-                        });
-                })
-                .fail(function(){
-                    window.location.href = `/quiz/attempt/${attemptId}/q/${idx}`;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setInterval(updateTimer, 1000);
+            updateTimer();
+            
+            const answerOptions = document.querySelectorAll('.answer-option');
+            answerOptions.forEach(option => {
+                option.addEventListener('click', function(e) {
+                    if (e.target.tagName === 'INPUT') return;
+                    const radio = this.querySelector('input[type="radio"]');
+                    if (radio) {
+                        radio.checked = true;
+                        radio.dispatchEvent(new Event('change'));
+                    }
                 });
-        }
-        // Delegated clicks
-        $(document).on('click', '.btn-next', function(e){ e.preventDefault(); nav('next'); });
-        $(document).on('click', '.btn-prev', function(e){
-            e.preventDefault();
-            const $btn = $(this);
-            const disabled = $btn.prop('disabled') || $btn.attr('data-disabled') === 'true';
-            if (!disabled) nav('prev');
-        });
-        $(document).on('click', '.btn-submit-now', function(e){
-            // If the button has a formaction, let the browser submit the current form (non-JS fallback works too)
-            if (this.hasAttribute('formaction')) {
-                return; // don't prevent default
-            }
-            e.preventDefault();
-            autoSubmit();
-        });
-    })(jQuery);
-    function startCountdownFromRemaining() {
-        const now = new Date().getTime();
-        const elapsedSec = Math.floor((now - startTime) / 1000);
-        let remaining = (timeLimit * 60) - elapsedSec;
-        if (remaining <= 0) {
-            autoSubmit();
-            return;
-        }
-        const h = Math.floor(remaining / 3600);
-        const m = Math.floor((remaining % 3600) / 60);
-        const s = remaining % 60;
-        const pad = n => n.toString().padStart(2, '0');
-        const timeStr = `${pad(h)}:${pad(m)}:${pad(s)}`;
-        if (typeof $.fn.setCountDownTimer === 'function') {
-            $('.counter').setCountDownTimer({
-                time: timeStr,
-                button: $('.btn-submit-now'),
-                countDownText: 'Remaining time:',
-                afterCountText: "Time's up!"
             });
-        }
-    }
-    setInterval(updateTimer, 1000);
-    updateTimer();
-    updateQuestionProgress();
-    $(function(){
-        startCountdownFromRemaining();
-    });
-</script>
+
+            document.addEventListener('keydown', function(e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                
+                if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'n') {
+                    const nextBtn = document.querySelector('.btn-next:not([disabled])');
+                    if (nextBtn) {
+                        e.preventDefault();
+                        nextBtn.click();
+                    }
+                } else if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'p') {
+                    const prevBtn = document.querySelector('.btn-prev:not([disabled])');
+                    if (prevBtn) {
+                        e.preventDefault();
+                        prevBtn.click();
+                    }
+                }
+            });
+        });
+
+        (function($){
+            function postAnswer(direction) {
+                const $form = $('#navForm');
+                const data = {
+                    questionId: $form.find('input[name="questionId"]').val(),
+                    answerId: $('input[name="answerId"]:checked').val(),
+                    index: $form.find('input[name="index"]').val(),
+                    nav: direction
+                };
+                const csrf = getCsrf();
+                return $.ajax({
+                    url: `/quiz/attempt/answer/${attemptId}`,
+                    method: 'POST',
+                    data: $.param(data),
+                    headers: csrf ? {[csrf.name]: csrf.value, 'X-Requested-With': 'XMLHttpRequest'} : {'X-Requested-With': 'XMLHttpRequest'}
+                });
+            }
+
+            function loadFragment(idx) {
+                return $.ajax({
+                    url: `/quiz/attempt/${attemptId}/q/${idx}/fragment`,
+                    method: 'GET',
+                    headers: {'X-Requested-With': 'XMLHttpRequest'}
+                });
+            }
+
+            function nav(direction) {
+                const $form = $('#navForm');
+                let idx = parseInt($form.find('input[name="index"]').val(), 10);
+                idx = direction === 'next' ? idx + 1 : idx - 1;
+                postAnswer(direction)
+                    .done(function(){
+                        loadFragment(idx)
+                            .done(function(html){
+                                const $container = $('#questionContainer');
+                                if ($container.length) {
+                                    $container.replaceWith(html);
+                                } else {
+                                    window.location.href = `/quiz/attempt/${attemptId}/q/${idx}`;
+                                }
+                            })
+                            .fail(function(){
+                                window.location.href = `/quiz/attempt/${attemptId}/q/${idx}`;
+                            });
+                    })
+                    .fail(function(){
+                        window.location.href = `/quiz/attempt/${attemptId}/q/${idx}`;
+                    });
+            }
+
+            $(document).on('click', '.btn-next', function(e){ e.preventDefault(); nav('next'); });
+            $(document).on('click', '.btn-prev', function(e){
+                e.preventDefault();
+                const $btn = $(this);
+                if (!$btn.prop('disabled')) nav('prev');
+            });
+            $(document).on('click', '.btn-submit-now', function(e){
+                if (this.hasAttribute('formaction')) return;
+                e.preventDefault();
+                autoSubmit();
+            });
+        })(jQuery);
+    </script>
 </body>
 </html>
