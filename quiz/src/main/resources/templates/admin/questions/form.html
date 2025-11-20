@@ -2,52 +2,510 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/admin}">
 <head>
     <title>Question Form</title>
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --primary-dark: #0b5ed7;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --info-color: #0dcaf0;
+            --border-color: #e9ecef;
+            --text-muted: #6c757d;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3a4a;
+            margin: 0;
+        }
+
+        .page-header p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin: 0.5rem 0 0 0;
+        }
+
+        .page-header-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        /* Alert Styles */
+        .alert {
+            border: none;
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .alert-success {
+            background: rgba(25, 135, 84, 0.1);
+            color: var(--success-color);
+            border-left: 4px solid var(--success-color);
+        }
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger-color);
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .alert-info {
+            background: rgba(13, 202, 240, 0.1);
+            color: var(--info-color);
+            border-left: 4px solid var(--info-color);
+        }
+
+        .alert i {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        /* Card Styles */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem;
+        }
+
+        .card-header h5 {
+            margin: 0;
+            color: #2d3a4a;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .form-section:last-of-type {
+            margin-bottom: 0;
+        }
+
+        .form-section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2d3a4a;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-section-title i {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #2d3a4a;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .form-label .required {
+            color: var(--danger-color);
+            margin-left: 0.25rem;
+        }
+
+        .form-control,
+        .form-select {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+            outline: none;
+        }
+
+        .form-control::placeholder {
+            color: #adb5bd;
+        }
+
+        .form-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.35rem;
+            display: block;
+        }
+
+        /* Answer Options */
+        .answers-section {
+            margin-bottom: 2rem;
+        }
+
+        .answer-option-item {
+            background: #f8f9fa;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .answer-option-item:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(13, 110, 253, 0.02);
+            box-shadow: 0 2px 8px rgba(13, 110, 253, 0.1);
+        }
+
+        .answer-option-item.selected {
+            border-color: var(--success-color);
+            background-color: rgba(25, 135, 84, 0.02);
+        }
+
+        .answer-option-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .answer-option-label {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .answer-input-group {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-end;
+        }
+
+        .answer-input-group .form-control {
+            flex: 1;
+        }
+
+        .answer-correct-badge {
+            background: rgba(25, 135, 84, 0.1);
+            color: var(--success-color);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .form-check-input {
+            width: 1.25em;
+            height: 1.25em;
+            cursor: pointer;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+            box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+        }
+
+        /* Button Styles */
+        .btn {
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-dark), #0a58ca);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            border: 1px solid var(--border-color);
+            color: #495057;
+        }
+
+        .btn-secondary:hover {
+            background: #dee2e6;
+            border-color: #adb5bd;
+            color: #212529;
+        }
+
+        .btn-back {
+            background: #e9ecef;
+            border: 1px solid var(--border-color);
+            color: #495057;
+            padding: 0.65rem 1.25rem;
+        }
+
+        .btn-back:hover {
+            background: #dee2e6;
+            border-color: #adb5bd;
+            color: #212529;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .button-group .btn {
+            padding: 0.75rem 2rem;
+        }
+
+        /* Help Text */
+        .help-text {
+            background: rgba(13, 202, 240, 0.05);
+            border-left: 4px solid var(--info-color);
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .help-text i {
+            color: var(--info-color);
+            margin-right: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .page-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .page-header-actions {
+                width: 100%;
+            }
+
+            .page-header-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .card-body {
+                padding: 1.5rem;
+            }
+
+            .answer-input-group {
+                flex-direction: column;
+            }
+
+            .answer-correct-badge {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .button-group .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
 <body>
     <div layout:fragment="adminContent">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1>
+                    <i class="bi bi-question-square me-2"></i>
+                    <span th:text="${question.id != null ? 'Edit Question' : 'Add Question'}">Question Form</span>
+                </h1>
+                <p th:text="${question.id != null ? 'Update question details and answers' : 'Create a new question for the quiz'}">Description</p>
+            </div>
+            <div class="page-header-actions">
+                <a href="/admin/quizzes" class="btn btn-back">
+                    <i class="bi bi-arrow-left"></i>Back
+                </a>
+            </div>
+        </div>
+
+        <!-- Form Card -->
         <div class="card">
             <div class="card-header">
-                <h3>Add/Edit Question</h3>
+                <h5>
+                    <i class="bi bi-form-check"></i>Question Details
+                </h5>
             </div>
             <div class="card-body">
-                <form th:action="${question.id != null ? '/admin/questions/update/' + question.id : '/admin/questions/save/' + quiz.id}" method="post" th:object="${question}">
+                <form th:action="${question.id != null ? '/admin/questions/update/' + question.id : '/admin/questions/save/' + quiz.id}" 
+                      method="post" th:object="${question}">
                     <input type="hidden" th:field="*{id}">
                     
-                    <div class="mb-3">
-                        <label>Title</label>
-                        <input type="text" class="form-control" th:field="*{title}" placeholder="Enter question title" required>
+                    <!-- Question Information Section -->
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="bi bi-info-circle"></i>
+                            Question Information
+                        </div>
+
+                        <div class="form-group">
+                            <label for="title" class="form-label">
+                                Question Title
+                                <span class="required">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="title" th:field="*{title}" 
+                                   placeholder="Enter a brief question title" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="content" class="form-label">
+                                Question Description
+                                <span class="required">*</span>
+                            </label>
+                            <textarea class="form-control" id="content" th:field="*{content}" 
+                                      placeholder="Enter the complete question text" rows="4" required></textarea>
+                            <small class="form-text">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Provide detailed question description
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="marks" class="form-label">
+                                Marks
+                                <span class="required">*</span>
+                            </label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="marks" th:field="*{marks}" 
+                                       min="1" placeholder="Enter marks" required>
+                                <span class="input-group-text">points</span>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label>Description</label>
-                        <textarea class="form-control" th:field="*{content}" rows="3" placeholder="Describe the question" required></textarea>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label>Marks</label>
-                        <input type="number" class="form-control" th:field="*{marks}" required>
-                    </div>
-                    
-                    <div id="answers-container">
-                        <div class="mb-3" th:each="answer, stat : *{answers}">
-                            <input type="hidden" th:field="*{answers[__${stat.index}__].id}">
-                            <div class="input-group">
-                                <input type="text" class="form-control" th:field="*{answers[__${stat.index}__].content}" placeholder="Option [[${stat.index}+1]]">
-                                <div class="input-group-append">
-                                    <div class="input-group-text">
-                                        <input type="radio" name="correctAnswerIndex" th:value="${stat.index}"
+                    <!-- Answer Options Section -->
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="bi bi-chat-left-text"></i>
+                            Answer Options
+                        </div>
+
+                        <div class="help-text">
+                            <i class="bi bi-lightbulb"></i>
+                            <strong>Tip:</strong> Select the correct answer by clicking the radio button
+                        </div>
+
+                        <div class="answers-section" id="answers-container">
+                            <div th:each="answer, stat : *{answers}" class="answer-option-item" 
+                                 th:classappend="${question.correctAnswer != null and answer.id != null and question.correctAnswer.id == answer.id} ? 'selected' : ''">
+                                <input type="hidden" th:field="*{answers[__${stat.index}__].id}">
+                                
+                                <div class="answer-option-header">
+                                    <span class="answer-option-label" th:text="${'ABCD'.charAt(stat.index)}"></span>
+                                    <div class="form-check ms-0">
+                                        <input class="form-check-input" type="radio" name="correctAnswerIndex" 
+                                               th:id="'correct-' + ${stat.index}"
+                                               th:value="${stat.index}"
                                                th:checked="${question.correctAnswer != null and answer.id != null and question.correctAnswer.id == answer.id}">
-                                        Correct
                                     </div>
+                                    <label class="form-check-label" th:for="'correct-' + ${stat.index}">
+                                        <span class="answer-correct-badge">
+                                            <i class="bi bi-check-circle"></i>Correct Answer
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <div class="answer-input-group">
+                                    <input type="text" class="form-control" 
+                                           th:field="*{answers[__${stat.index}__].content}" 
+                                           th:placeholder="'Option ' + ${'ABCD'.charAt(stat.index)}"
+                                           placeholder="Enter option text" required>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary">Save Question</button>
+
+                    <!-- Action Buttons -->
+                    <div class="button-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i th:if="${question.id == null}" class="bi bi-plus-circle"></i>
+                            <i th:unless="${question.id == null}" class="bi bi-check-circle"></i>
+                            <span th:text="${question.id != null ? 'Update Question' : 'Save Question'}">Save</span>
+                        </button>
+                        <a href="/admin/quizzes" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i>Cancel
+                        </a>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
-    
 </body>
 </html>

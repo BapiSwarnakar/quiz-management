@@ -2,66 +2,450 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/admin}">
 <head>
     <title>Edit User</title>
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --primary-dark: #0b5ed7;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --border-color: #e9ecef;
+            --text-muted: #6c757d;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3a4a;
+            margin: 0;
+        }
+
+        .page-header p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin: 0.5rem 0 0 0;
+        }
+
+        .page-header-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        /* Alert Styles */
+        .alert {
+            border: none;
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .alert-success {
+            background: rgba(25, 135, 84, 0.1);
+            color: var(--success-color);
+            border-left: 4px solid var(--success-color);
+        }
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger-color);
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .alert i {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        /* Card Styles */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem;
+        }
+
+        .card-header h5 {
+            margin: 0;
+            color: #2d3a4a;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .form-section:last-of-type {
+            margin-bottom: 0;
+        }
+
+        .form-section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2d3a4a;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-section-title i {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #2d3a4a;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .form-label .required {
+            color: var(--danger-color);
+            margin-left: 0.25rem;
+        }
+
+        .form-control,
+        .form-select {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+            outline: none;
+        }
+
+        .form-control::placeholder {
+            color: #adb5bd;
+        }
+
+        .form-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.35rem;
+            display: block;
+        }
+
+        /* Checkbox Styles */
+        .roles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .form-check {
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .form-check:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(13, 110, 253, 0.02);
+        }
+
+        .form-check-input {
+            width: 1.25em;
+            height: 1.25em;
+            margin-top: 0.15em;
+            cursor: pointer;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        .form-check-label {
+            font-weight: 500;
+            color: #2d3a4a;
+            cursor: pointer;
+            margin-left: 0.5rem;
+            user-select: none;
+        }
+
+        /* Button Styles */
+        .btn {
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-dark), #0a58ca);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            border: 1px solid var(--border-color);
+            color: #495057;
+        }
+
+        .btn-secondary:hover {
+            background: #dee2e6;
+            border-color: #adb5bd;
+            color: #212529;
+        }
+
+        .btn-back {
+            background: #e9ecef;
+            border: 1px solid var(--border-color);
+            color: #495057;
+            padding: 0.65rem 1.25rem;
+        }
+
+        .btn-back:hover {
+            background: #dee2e6;
+            border-color: #adb5bd;
+            color: #212529;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .button-group .btn {
+            padding: 0.75rem 2rem;
+        }
+
+        /* User Info Badge */
+        .user-info-badge {
+            display: inline-block;
+            background: rgba(13, 110, 253, 0.1);
+            color: var(--primary-color);
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .page-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .page-header-actions {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .page-header-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .card-body {
+                padding: 1.5rem;
+            }
+
+            .roles-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .button-group .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
 <body>
     <div layout:fragment="adminContent">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>Edit User</h1>
-            <a href="/admin/users" class="btn btn-secondary">Back to Users</a>
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1><i class="bi bi-pencil-square me-2"></i>Edit User</h1>
+                <p>Update user account information and permissions</p>
+            </div>
+            <div class="page-header-actions">
+                <a href="/admin/users" class="btn btn-back">
+                    <i class="bi bi-arrow-left"></i>Back to Users
+                </a>
+            </div>
         </div>
 
         <div th:if="${success}" class="alert alert-success" role="alert">
+            <i class="bi bi-check-circle"></i>
             <span th:text="${success}"></span>
         </div>
         <div th:if="${error}" class="alert alert-danger" role="alert">
+            <i class="bi bi-exclamation-triangle"></i>
             <span th:text="${error}"></span>
         </div>
 
+        <!-- Form Card -->
         <div class="card">
+            <div class="card-header">
+                <h5>
+                    <i class="bi bi-form-check"></i>User Information
+                </h5>
+            </div>
             <div class="card-body">
                 <form th:action="@{/admin/users/edit/{id}(id=${user.id})}" th:object="${user}" method="post">
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Name</label>
-                        <input type="text" class="form-control" id="name" th:field="*{name}" required>
+                    
+                    <!-- Personal Information Section -->
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="bi bi-person"></i>
+                            Personal Information
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <div class="form-group">
+                                    <label for="name" class="form-label">
+                                        Full Name
+                                        <span class="required">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" id="name" th:field="*{name}" 
+                                           placeholder="Enter full name" required>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="form-group">
+                                    <label for="email" class="form-label">
+                                        Email Address
+                                        <span class="required">*</span>
+                                    </label>
+                                    <input type="email" class="form-control" id="email" th:field="*{email}" 
+                                           placeholder="Enter email address" required>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="form-group">
+                                    <label for="mobile" class="form-label">
+                                        Mobile Number
+                                    </label>
+                                    <input type="text" class="form-control" id="mobile" th:field="*{mobile}" 
+                                           placeholder="Enter mobile number">
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="form-group">
+                                    <label for="gender" class="form-label">
+                                        Gender
+                                    </label>
+                                    <select class="form-select" id="gender" th:field="*{gender}">
+                                        <option value="">Select Gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" th:field="*{email}" required>
-                    </div>
+                    <!-- Roles Section -->
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="bi bi-key"></i>
+                            Assign Roles
+                        </div>
 
-                    <div class="mb-3">
-                        <label for="mobile" class="form-label">Mobile</label>
-                        <input type="text" class="form-control" id="mobile" th:field="*{mobile}">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="gender" class="form-label">Gender</label>
-                        <select class="form-select" id="gender" th:field="*{gender}">
-                            <option value="">Select Gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Roles</label>
-                        <div th:each="role : ${allRoles}">
-                            <div class="form-check">
+                        <div th:if="${allRoles.size() > 0}" class="roles-grid">
+                            <div th:each="role : ${allRoles}" class="form-check">
                                 <input class="form-check-input" type="checkbox" 
                                        th:id="'role-' + ${role.id}"
                                        name="roleIds" 
                                        th:value="${role.id}"
                                        th:checked="${user.roles.contains(role)}">
-                                <label class="form-check-label" th:for="'role-' + ${role.id}" th:text="${role.name}"></label>
+                                <label class="form-check-label" th:for="'role-' + ${role.id}">
+                                    <strong th:text="${role.name}"></strong>
+                                </label>
                             </div>
+                        </div>
+
+                        <div th:unless="${allRoles.size() > 0}" class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            No roles available. Please create roles first.
                         </div>
                     </div>
 
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary">Update User</button>
-                        <a href="/admin/users" class="btn btn-secondary">Cancel</a>
+                    <!-- Action Buttons -->
+                    <div class="button-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i>Update User
+                        </button>
+                        <a href="/admin/users" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i>Cancel
+                        </a>
                     </div>
                 </form>
             </div>

@@ -2,37 +2,562 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/admin}">
 <head>
     <title>Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --primary-dark: #0b5ed7;
+            --success-color: #198754;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #0dcaf0;
+        }
+
+        .dashboard-header {
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3a4a;
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-header p {
+            color: #6c757d;
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        /* Metric Cards */
+        .metric-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+            transform: translateY(-4px);
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            opacity: 0.08;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card.primary::before {
+            background: var(--primary-color);
+        }
+
+        .metric-card.success::before {
+            background: var(--success-color);
+        }
+
+        .metric-card.warning::before {
+            background: var(--warning-color);
+        }
+
+        .metric-card.info::before {
+            background: var(--info-color);
+        }
+
+        .metric-card:hover::before {
+            right: -30%;
+            top: -30%;
+        }
+
+        .metric-card .card-body {
+            padding: 1.75rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .metric-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card.primary .metric-icon {
+            background: rgba(13, 110, 253, 0.1);
+            color: var(--primary-color);
+        }
+
+        .metric-card.success .metric-icon {
+            background: rgba(25, 135, 84, 0.1);
+            color: var(--success-color);
+        }
+
+        .metric-card.warning .metric-icon {
+            background: rgba(255, 193, 7, 0.1);
+            color: var(--warning-color);
+        }
+
+        .metric-card.info .metric-icon {
+            background: rgba(13, 202, 240, 0.1);
+            color: var(--info-color);
+        }
+
+        .metric-card:hover .metric-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2d3a4a;
+            line-height: 1;
+            margin-bottom: 0.75rem;
+        }
+
+        .metric-change {
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .metric-change.positive {
+            color: var(--success-color);
+        }
+
+        .metric-change.negative {
+            color: var(--danger-color);
+        }
+
+        /* Chart Cards */
+        .chart-card {
+            background: #ffffff;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-card .card-header {
+            background: #ffffff;
+            border-bottom: 1px solid #e9ecef;
+            padding: 1.5rem;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .chart-card .card-header h5 {
+            margin: 0;
+            color: #2d3a4a;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .chart-card .card-body {
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 1rem;
+        }
+
+        .chart-container.small {
+            height: 250px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Activity Feed */
+        .activity-item {
+            padding: 1rem 0;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .activity-badge.primary {
+            background: rgba(13, 110, 253, 0.1);
+            color: var(--primary-color);
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            color: #2d3a4a;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-time {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .metric-value {
+                font-size: 2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div layout:fragment="adminContent">
-        <div class="card">
-            <div class="card-header">
-                <h4>Admin Dashboard</h4>
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <h1><i class="bi bi-speedometer2 me-2"></i>Dashboard</h1>
+            <p>Welcome back! Here's an overview of your quiz platform.</p>
+        </div>
+
+        <!-- Metric Cards Row -->
+        <div class="stats-grid">
+            <!-- Total Users Card -->
+            <div class="card metric-card primary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="metric-label">Total Users</div>
+                            <div class="metric-value" th:text="${userCount}">0</div>
+                            <div class="metric-change positive">
+                                <i class="bi bi-arrow-up"></i>
+                                <span>12% from last month</span>
+                            </div>
+                        </div>
+                        <div class="metric-icon">
+                            <i class="bi bi-people"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <p class="text-muted mb-3">Use the sidebar to navigate through admin options.</p>
-                <div class="row g-3">
-                    <div class="col-12 col-sm-6 col-lg-4">
-                        <div class="border rounded p-3">
-                            <div class="small text-uppercase text-muted">Total Users</div>
-                            <div class="fs-3" th:text="${userCount}">0</div>
+
+            <!-- Active Quizzes Card -->
+            <div class="card metric-card success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="metric-label">Active Quizzes</div>
+                            <div class="metric-value" th:text="${quizCount}">0</div>
+                            <div class="metric-change positive">
+                                <i class="bi bi-arrow-up"></i>
+                                <span>8% increase</span>
+                            </div>
+                        </div>
+                        <div class="metric-icon">
+                            <i class="bi bi-ui-checks-grid"></i>
                         </div>
                     </div>
-                    <div class="col-12 col-sm-6 col-lg-4">
-                        <div class="border rounded p-3">
-                            <div class="small text-uppercase text-muted">Active Quizzes</div>
-                            <div class="fs-3" th:text="${quizCount}">0</div>
+                </div>
+            </div>
+
+            <!-- Categories Card -->
+            <div class="card metric-card info">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="metric-label">Categories</div>
+                            <div class="metric-value" th:text="${categories != null ? categories.size() : 0}">0</div>
+                            <div class="metric-change positive">
+                                <i class="bi bi-arrow-up"></i>
+                                <span>All organized</span>
+                            </div>
+                        </div>
+                        <div class="metric-icon">
+                            <i class="bi bi-tags"></i>
                         </div>
                     </div>
-                    <div class="col-12 col-sm-6 col-lg-4">
-                        <div class="border rounded p-3">
-                            <div class="small text-uppercase text-muted">Categories</div>
-                            <div class="fs-3" th:text="${categories != null ? categories.size() : 0}">0</div>
+                </div>
+            </div>
+
+            <!-- Total Attempts Card -->
+            <div class="card metric-card warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="metric-label">Total Attempts</div>
+                            <div class="metric-value">1,245</div>
+                            <div class="metric-change positive">
+                                <i class="bi bi-arrow-up"></i>
+                                <span>24% this week</span>
+                            </div>
+                        </div>
+                        <div class="metric-icon">
+                            <i class="bi bi-pencil-square"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row g-3 mb-4">
+            <!-- Quiz Performance Chart -->
+            <div class="col-12 col-lg-6">
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h5>Quiz Performance</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Distribution Chart -->
+            <div class="col-12 col-lg-6">
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h5>Category Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container small">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Row -->
+        <div class="row g-3">
+            <!-- Recent Activity -->
+            <div class="col-12 col-lg-6">
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h5>Recent Activity</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="activity-item">
+                            <div class="activity-badge primary">
+                                <i class="bi bi-person-plus"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">New User Registered</div>
+                                <div class="activity-time">2 hours ago</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-badge primary">
+                                <i class="bi bi-pencil-square"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">Quiz Created</div>
+                                <div class="activity-time">4 hours ago</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-badge primary">
+                                <i class="bi bi-check-circle"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">Quiz Attempt Completed</div>
+                                <div class="activity-time">1 day ago</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-badge primary">
+                                <i class="bi bi-gear"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">System Settings Updated</div>
+                                <div class="activity-time">2 days ago</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="col-12 col-lg-6">
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h5>Quick Statistics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="p-3 bg-light rounded-2">
+                                    <div class="small text-muted mb-2">Avg. Quiz Score</div>
+                                    <div class="h5 mb-0 fw-bold">78.5%</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 bg-light rounded-2">
+                                    <div class="small text-muted mb-2">Completion Rate</div>
+                                    <div class="h5 mb-0 fw-bold">92%</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 bg-light rounded-2">
+                                    <div class="small text-muted mb-2">Active Users Today</div>
+                                    <div class="h5 mb-0 fw-bold">156</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 bg-light rounded-2">
+                                    <div class="small text-muted mb-2">Avg. Time/Quiz</div>
+                                    <div class="h5 mb-0 fw-bold">12m 45s</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Performance Chart
+            const performanceCtx = document.getElementById('performanceChart')?.getContext('2d');
+            if (performanceCtx) {
+                new Chart(performanceCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Quiz Attempts',
+                            data: [45, 52, 48, 61, 55, 67, 72],
+                            borderColor: '#0d6efd',
+                            backgroundColor: 'rgba(13, 110, 253, 0.05)',
+                            borderWidth: 2.5,
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: '#0d6efd',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 5,
+                            pointHoverRadius: 7
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    color: '#6c757d'
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: '#6c757d'
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Category Distribution Chart
+            const categoryCtx = document.getElementById('categoryChart')?.getContext('2d');
+            if (categoryCtx) {
+                new Chart(categoryCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Science', 'Mathematics', 'History', 'Languages', 'Technology'],
+                        datasets: [{
+                            data: [30, 25, 20, 15, 10],
+                            backgroundColor: [
+                                '#0d6efd',
+                                '#198754',
+                                '#ffc107',
+                                '#0dcaf0',
+                                '#fd7e14'
+                            ],
+                            borderColor: '#ffffff',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>

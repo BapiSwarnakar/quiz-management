@@ -2,51 +2,407 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/admin}">
 <head>
     <title>Category Management</title>
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --primary-dark: #0b5ed7;
+            --success-color: #198754;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #0dcaf0;
+            --border-color: #e9ecef;
+            --text-muted: #6c757d;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3a4a;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-box .form-control {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.65rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-box .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+        }
+
+        .btn-group-toolbar {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .btn {
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            padding: 0.65rem 1.25rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-dark), #0a58ca);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            border: 1px solid var(--border-color);
+            color: #495057;
+        }
+
+        .btn-secondary:hover {
+            background: #dee2e6;
+            border-color: #adb5bd;
+            color: #212529;
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem;
+        }
+
+        .card-header h5 {
+            margin: 0;
+            color: #2d3a4a;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Table Styles */
+        .table {
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .table thead {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .table thead th {
+            color: #2d3a4a;
+            font-weight: 600;
+            padding: 1rem;
+            border: none;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-color: var(--border-color);
+        }
+
+        .table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+            box-shadow: inset 3px 0 0 var(--primary-color);
+        }
+
+        .category-name {
+            font-weight: 600;
+            color: #2d3a4a;
+        }
+
+        .category-description {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 0.875rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .btn-edit {
+            background: rgba(255, 193, 7, 0.1);
+            color: var(--warning-color);
+        }
+
+        .btn-edit:hover {
+            background: var(--warning-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
+        }
+
+        .btn-delete {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger-color);
+        }
+
+        .btn-delete:hover {
+            background: var(--danger-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+        }
+
+        /* Alert Styles */
+        .alert {
+            border: none;
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .alert-success {
+            background: rgba(25, 135, 84, 0.1);
+            color: var(--success-color);
+            border-left: 4px solid var(--success-color);
+        }
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger-color);
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .alert-info {
+            background: rgba(13, 202, 240, 0.1);
+            color: var(--info-color);
+            border-left: 4px solid var(--info-color);
+        }
+
+        .alert-info a {
+            color: var(--info-color);
+            font-weight: 600;
+            text-decoration: none;
+            border-bottom: 2px solid var(--info-color);
+        }
+
+        .alert-info a:hover {
+            color: #0b9cc4;
+        }
+
+        .alert i {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: #dee2e6;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h4 {
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .empty-state p {
+            color: #adb5bd;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                min-width: auto;
+            }
+
+            .btn-group-toolbar {
+                flex-direction: column;
+            }
+
+            .btn-group-toolbar .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .table {
+                font-size: 0.9rem;
+            }
+
+            .table thead th,
+            .table tbody td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .action-buttons .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .page-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <div layout:fragment="adminContent">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>Category Management</h1>
-            <div>
-                <a href="/admin/categories/create" class="btn btn-primary">Add New Category</a>
-                <a href="/admin/dashboard" class="btn btn-secondary">Back to Dashboard</a>
-            </div>
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1><i class="bi bi-tags me-2"></i>Category Management</h1>
+            <p>Organize and manage quiz categories</p>
         </div>
 
         <div th:if="${success}" class="alert alert-success" role="alert">
+            <i class="bi bi-check-circle"></i>
             <span th:text="${success}"></span>
         </div>
         <div th:if="${error}" class="alert alert-danger" role="alert">
+            <i class="bi bi-exclamation-triangle"></i>
             <span th:text="${error}"></span>
         </div>
 
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="search-box">
+                <input type="text" class="form-control" id="searchInput" placeholder="Search categories by name...">
+            </div>
+            <div class="btn-group-toolbar">
+                <a href="/admin/categories/create" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i>Add New Category
+                </a>
+            </div>
+        </div>
+
+        <!-- Categories Table Card -->
         <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5><i class="bi bi-list-ul me-2"></i>All Categories</h5>
+                    <span class="badge bg-light text-dark" th:text="${categories.size()} + ' categories'"></span>
+                </div>
+            </div>
             <div class="card-body">
                 <div th:if="${categories.isEmpty()}" class="alert alert-info">
-                    No categories found. <a href="/admin/categories/create">Create one now</a>
+                    <i class="bi bi-info-circle"></i>
+                    <div>
+                        <strong>No categories found</strong>
+                        <p class="mb-0">Get started by <a href="/admin/categories/create">creating a new category</a></p>
+                    </div>
                 </div>
 
                 <div th:unless="${categories.isEmpty()}" class="table-responsive">
-                    <table class="table table-striped table-hover">
-                        <thead class="table-dark">
+                    <table class="table table-hover">
+                        <thead>
                             <tr>
-                                <th>ID</th>
                                 <th>Name</th>
                                 <th>Description</th>
-                                <th>Actions</th>
+                                <th class="text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:each="category : ${categories}">
-                                <td th:text="${category.id}"></td>
-                                <td th:text="${category.name}"></td>
-                                <td th:text="${category.description}"></td>
                                 <td>
-                                    <a th:href="@{/admin/categories/edit/{id}(id=${category.id})}" class="btn btn-sm btn-warning">Edit</a>
-                                    <form th:action="@{/admin/categories/delete}" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this category?');">
-                                        <input type="hidden" name="categoryId" th:value="${category.id}">
-                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                                    </form>
+                                    <div class="category-name" th:text="${category.name}"></div>
+                                </td>
+                                <td>
+                                    <div class="category-description" th:text="${category.description}"></div>
+                                </td>
+                                <td class="text-center">
+                                    <div class="action-buttons">
+                                        <a th:href="@{/admin/categories/edit/{id}(id=${category.id})}" class="btn btn-sm btn-edit" title="Edit category">
+                                            <i class="bi bi-pencil-square"></i>Edit
+                                        </a>
+                                        <form th:action="@{/admin/categories/delete}" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this category? This action cannot be undone.');">
+                                            <input type="hidden" name="categoryId" th:value="${category.id}">
+                                            <button type="submit" class="btn btn-sm btn-delete" title="Delete category">
+                                                <i class="bi bi-trash"></i>Delete
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>
@@ -55,5 +411,24 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase();
+            const tableRows = document.querySelectorAll('table tbody tr');
+
+            tableRows.forEach(row => {
+                const name = row.querySelector('.category-name')?.textContent.toLowerCase() || '';
+                const description = row.querySelector('.category-description')?.textContent.toLowerCase() || '';
+
+                if (name.includes(searchTerm) || description.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
 </body>
 </html>

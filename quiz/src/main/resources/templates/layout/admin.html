@@ -98,7 +98,7 @@
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            padding: 0.5rem 1.5rem;
+            padding: 0.1rem 1.5rem;
             margin-top: 1.5rem;
             margin-bottom: 0.75rem;
         }
@@ -482,17 +482,9 @@
                     <div class="collapse" id="reportsMenu">
                         <ul class="submenu">
                             <li><a href="/admin/reports" th:classappend="${active == 'reports' && activeSub == 'overview'} ? ' active'" sec:authorize="hasRole('ROLE_ADMIN') or hasAuthority('REPORT_VIEW')">Overview</a></li>
-                            <li><a href="/admin/reports/performance" th:classappend="${active == 'reports' && activeSub == 'performance'} ? ' active'" sec:authorize="hasRole('ROLE_ADMIN') or hasAuthority('REPORT_VIEW')">Performance</a></li>
-                            <li><a href="/admin/reports/analytics" th:classappend="${active == 'reports' && activeSub == 'analytics'} ? ' active'" sec:authorize="hasRole('ROLE_ADMIN') or hasAuthority('REPORT_ANALYTICS')">Analytics</a></li>
                             <li><a href="/admin/reports/export" th:classappend="${active == 'reports' && activeSub == 'export'} ? ' active'" sec:authorize="hasRole('ROLE_ADMIN') or hasAuthority('REPORT_EXPORT')">Export Data</a></li>
                         </ul>
                     </div>
-                </li>
-                <li class="menu-item" sec:authorize="hasRole('ROLE_ADMIN') or hasAuthority('MONITORING_VIEW')">
-                    <a href="/admin/monitoring" th:classappend="${active == 'monitoring'} ? ' active'">
-                        <span class="menu-icon"><i class="bi bi-graph-up-arrow"></i></span>
-                        <span>Monitoring</span>
-                    </a>
                 </li>
             </ul>
 
