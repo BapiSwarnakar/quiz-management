@@ -276,15 +276,12 @@
     </div>
 
     <script th:inline="javascript">
-        const timeLimit = /*[[${quiz.timeInMinutes}]]*/ 30;
-        const startTime = new Date(/*[[${attempt.startTime}]]*/).getTime();
+        let remaining = /*[[${remainingSeconds}]]*/ 1800;
         const attemptId = /*[[${attempt.id}]]*/ 0;
+        let isSubmitting = false;
+        let timerInterval;
 
         function updateTimer() {
-            const now = new Date().getTime();
-            const elapsedSec = Math.floor((now - startTime) / 1000);
-            const remaining = (timeLimit * 60) - elapsedSec;
-            
             const m = Math.max(0, Math.floor(remaining / 60));
             const s = Math.max(0, remaining % 60);
             const timeString = `${m}:${s.toString().padStart(2, '0')}`;
@@ -306,8 +303,14 @@
             }
             
             if (remaining <= 0) {
-                autoSubmit();
+                if (!isSubmitting) {
+                    isSubmitting = true;
+                    if (timerInterval) clearInterval(timerInterval);
+                    autoSubmit();
+                }
+                return;
             }
+            remaining--;
         }
 
         function autoSubmit() {
@@ -325,7 +328,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            setInterval(updateTimer, 1000);
+            timerInterval = setInterval(updateTimer, 1000);
             updateTimer();
             
             const answerOptions = document.querySelectorAll('.answer-option');

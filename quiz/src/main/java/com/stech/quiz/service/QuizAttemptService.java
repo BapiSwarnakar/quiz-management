@@ -112,4 +112,13 @@ public class QuizAttemptService {
         return attemptRepository.findById(attemptId)
             .orElseThrow(() -> new RuntimeException("Attempt not found"));
     }
+
+    public long getRemainingSeconds(Long attemptId) {
+        QuizAttempt attempt = getAttempt(attemptId);
+        if (attempt.isCompleted()) return 0;
+        
+        long limitSeconds = (long) attempt.getQuiz().getTimeInMinutes() * 60;
+        long elapsedSeconds = java.time.Duration.between(attempt.getStartTime(), LocalDateTime.now()).getSeconds();
+        return Math.max(0, limitSeconds - elapsedSeconds);
+    }
 }

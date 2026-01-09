@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import com.stech.quiz.entity.Quiz;
 import com.stech.quiz.entity.Question;
 import java.util.List;
+import java.util.Map;
 import com.stech.quiz.service.UserService;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +46,10 @@ public class QuizAttemptController {
     @GetMapping("/{attemptId}/q/{index}")
     public String showQuestion(@PathVariable Long attemptId, @PathVariable int index, Model model) {
         QuizAttempt attempt = attemptService.getAttempt(attemptId);
+        if (attempt.isCompleted()) {
+            var result = attemptService.finalizeAttempt(attemptId);
+            return "redirect:/quiz/result/" + result.getId();
+        }
         Quiz quiz = attempt.getQuiz();
         List<Question> questions = quiz.getQuestions();
         if (index < 1) {
@@ -75,6 +80,7 @@ public class QuizAttemptController {
         model.addAttribute("total", questions.size());
         model.addAttribute("answeredCount", answeredCount);
         model.addAttribute("selectedAnswerId", selectedAnswerId);
+        model.addAttribute("remainingSeconds", attemptService.getRemainingSeconds(attemptId));
         return "quiz/attempt-step";
     }
 
@@ -104,10 +110,33 @@ public class QuizAttemptController {
 
     @PostMapping("/submit/{attemptId}")
     public String submit(@PathVariable Long attemptId,
-                         @RequestParam Long questionId,
-                         @RequestParam(required = false) Long answerId) {
-        // Save last answer then submit
-        attemptService.saveAnswer(attemptId, questionId, answerId);
+                         @RequestParam(required = false) Long questionId,
+                         @RequestParam(required = false) Long answerId,
+                         @RequestParam Map<String, String> allParams) {
+        
+        // Handle single question submission (from attempt-step.html)
+        if (questionId != null) {
+            attemptService.saveAnswer(attemptId, questionId, answerId);
+        } else {
+            // Handle full form submission (from attempt.html)
+            // Look for params like answers[123]=456
+            Map<Long, Long> answers = new java.util.HashMap<>();
+            allParams.forEach((key, value) -> {
+                if (key.startsWith("answers[") && key.endsWith("]")) {
+                    try {
+                        Long qId = Long.parseLong(key.substring(8, key.length() - 1));
+                        Long aId = Long.parseLong(value);
+                        answers.put(qId, aId);
+                    } catch (NumberFormatException ignored) {}
+                }
+            });
+            if (!answers.isEmpty()) {
+                QuizAttempt attempt = attemptService.getAttempt(attemptId);
+                attempt.setUserAnswers(answers);
+                // We'll let finalizeAttempt save the status
+            }
+        }
+        
         var result = attemptService.finalizeAttempt(attemptId);
         return "redirect:/quiz/result/" + result.getId();
     }
@@ -140,6 +169,7 @@ public class QuizAttemptController {
         model.addAttribute("total", questions.size());
         model.addAttribute("answeredCount", answeredCount);
         model.addAttribute("selectedAnswerId", selectedAnswerId);
+        model.addAttribute("remainingSeconds", attemptService.getRemainingSeconds(attemptId));
         return "quiz/attempt-step :: questionBody";
     }
 }
