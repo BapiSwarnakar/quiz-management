@@ -35,9 +35,15 @@ public class QuizAttemptService {
         QuizAttempt attempt = attemptRepository.findById(attemptId)
             .orElseThrow(() -> new RuntimeException("Attempt not found"));
             
+        if (attempt.isCompleted()) {
+            return resultService.getResultByAttemptId(attemptId)
+                .orElseGet(() -> calculateResult(attempt));
+        }
+
         attempt.setUserAnswers(answers);
         attempt.setEndTime(LocalDateTime.now());
         attempt.setCompleted(true);
+        attemptRepository.save(attempt);
         
         return calculateResult(attempt);
     }
@@ -61,8 +67,15 @@ public class QuizAttemptService {
     public QuizResult finalizeAttempt(Long attemptId) {
         QuizAttempt attempt = attemptRepository.findById(attemptId)
             .orElseThrow(() -> new RuntimeException("Attempt not found"));
+            
+        if (attempt.isCompleted()) {
+            return resultService.getResultByAttemptId(attemptId)
+                .orElseGet(() -> calculateResult(attempt));
+        }
+
         attempt.setEndTime(LocalDateTime.now());
         attempt.setCompleted(true);
+        attemptRepository.save(attempt);
         return calculateResult(attempt);
     }
 
@@ -89,6 +102,8 @@ public class QuizAttemptService {
         result.setWrongAnswers(totalQuestions - correctAnswers);
         result.setStartTime(attempt.getStartTime());
         result.setEndTime(attempt.getEndTime());
+        result.setAttempt(attempt);
+        result.setStatus("COMPLETED");
         
         return resultService.saveResult(result);
     }

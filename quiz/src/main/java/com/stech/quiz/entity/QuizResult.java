@@ -28,4 +28,8 @@ public class QuizResult {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String status;
+    
+    @OneToOne
+    @JoinColumn(name = "attempt_id", unique = true)
+    private QuizAttempt attempt;
 }

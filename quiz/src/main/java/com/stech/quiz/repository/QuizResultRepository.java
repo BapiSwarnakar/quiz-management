@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface QuizResultRepository extends JpaRepository<QuizResult, Long> {
     List<QuizResult> findByUserId(Long userId);
+    java.util.Optional<QuizResult> findByAttemptId(Long attemptId);
     
     List<QuizResult> findByQuizId(Long quizId);
     

@@ -14,12 +14,18 @@ public class QuizResultService {
     private final QuizResultRepository quizResultRepository;
     
     public QuizResult saveResult(QuizResult result) {
-        result.setEndTime(LocalDateTime.now());
+        if (result.getEndTime() == null) {
+            result.setEndTime(LocalDateTime.now());
+        }
         return quizResultRepository.save(result);
     }
     
     public List<QuizResult> getUserResults(Long userId) {
         return quizResultRepository.findByUserId(userId);
+    }
+    
+    public java.util.Optional<QuizResult> getResultByAttemptId(Long attemptId) {
+        return quizResultRepository.findByAttemptId(attemptId);
     }
     
     public QuizResult getResult(Long resultId) {
