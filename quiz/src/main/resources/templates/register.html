@@ -42,6 +42,10 @@
             font-size: 0.8rem;
             margin-top: 0.25rem;
         }
+        .invalid-feedback {
+            font-size: 0.8rem;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -77,8 +81,10 @@
                                             <i class="bi bi-person"></i>
                                         </span>
                                         <input type="text" class="form-control" id="name" th:field="*{name}" 
-                                               placeholder="Enter your full name" required>
+                                               th:errorclass="is-invalid"
+                                               placeholder="Enter your full name" required minlength="2" maxlength="50">
                                     </div>
+                                    <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="invalid-feedback"></div>
                                 </div>
                             </div>
                             
@@ -89,8 +95,10 @@
                                         <i class="bi bi-envelope"></i>
                                     </span>
                                     <input type="email" class="form-control" id="email" th:field="*{email}" 
+                                           th:errorclass="is-invalid"
                                            placeholder="Enter your email" required>
                                 </div>
+                                <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="invalid-feedback"></div>
                             </div>
                             
                             <div class="mb-3">
@@ -100,8 +108,12 @@
                                         <i class="bi bi-telephone"></i>
                                     </span>
                                     <input type="text" class="form-control" id="mobile" th:field="*{mobile}" 
-                                           placeholder="Enter your mobile number">
+                                           th:errorclass="is-invalid"
+                                           placeholder="Enter 10 digit mobile number" 
+                                           pattern="[0-9]{10}" maxlength="10">
                                 </div>
+                                <div th:if="${#fields.hasErrors('mobile')}" th:errors="*{mobile}" class="invalid-feedback"></div>
+                                <small class="form-text text-muted">Must be exactly 10 digits.</small>
                             </div>
                             
                             <div class="mb-3">
@@ -126,11 +138,13 @@
                                         <i class="bi bi-lock"></i>
                                     </span>
                                     <input type="password" class="form-control" id="password" th:field="*{password}" 
+                                           th:errorclass="is-invalid"
                                            placeholder="Create a password" required minlength="6">
                                     <button class="btn btn-outline-secondary" type="button" id="togglePassword">
                                         <i class="bi bi-eye" id="toggleIcon"></i>
                                     </button>
                                 </div>
+                                <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="invalid-feedback"></div>
                                 <small class="form-text text-muted">
                                     <i class="bi bi-info-circle"></i> Password must be at least 6 characters long.
                                 </small>
@@ -181,6 +195,11 @@
                     bsAlert.close();
                 });
             }, 5000);
+        });
+
+        // Mobile number validation: only digits
+        document.getElementById('mobile').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
         });
     </script>
 </body>

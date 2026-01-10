@@ -453,59 +453,65 @@
             </form>
         </div>
     </div>
-</div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const selectAllCheckbox = document.getElementById('selectAllPermissions');
-        const permissionCheckboxes = document.querySelectorAll('.permission-checkbox');
-        const permissionItems = document.querySelectorAll('.permission-item');
-
-        // Update parent item styling on checkbox change
-        permissionCheckboxes.forEach((checkbox, index) => {
-            checkbox.addEventListener('change', function() {
-                if (this.checked) {
-                    permissionItems[index].classList.add('checked');
-                } else {
-                    permissionItems[index].classList.remove('checked');
-                }
-                updateSelectAllState();
-            });
-
-            // Make entire card clickable
-            permissionItems[index].addEventListener('click', function(e) {
-                if (e.target !== checkbox) {
-                    checkbox.checked = !checkbox.checked;
-                    checkbox.dispatchEvent(new Event('change'));
-                }
-            });
-        });
-
-        // Handle select all
-        selectAllCheckbox?.addEventListener('change', function() {
-            permissionCheckboxes.forEach((checkbox, index) => {
-                checkbox.checked = this.checked;
-                if (this.checked) {
-                    permissionItems[index].classList.add('checked');
-                } else {
-                    permissionItems[index].classList.remove('checked');
-                }
-            });
-        });
-
-        // Update select all state
-        function updateSelectAllState() {
-            const allChecked = Array.from(permissionCheckboxes).every(cb => cb.checked);
-            const someChecked = Array.from(permissionCheckboxes).some(cb => cb.checked);
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const master = document.getElementById('selectAllPermissions');
+            const items = document.querySelectorAll('.permission-item');
             
-            if (selectAllCheckbox) {
-                selectAllCheckbox.checked = allChecked;
-                selectAllCheckbox.indeterminate = someChecked && !allChecked;
-            }
-        }
+            if (items.length === 0) return;
 
-        updateSelectAllState();
-    });
-</script>
+            // Sync the master checkbox based on children
+            function syncMaster() {
+                if (!master) return;
+                const cbs = Array.from(document.querySelectorAll('.permission-checkbox'));
+                const checkedCount = cbs.filter(c => c.checked).length;
+                master.checked = checkedCount === cbs.length;
+                master.indeterminate = checkedCount > 0 && checkedCount < cbs.length;
+            }
+
+            // Master checkbox listener
+            if (master) {
+                master.addEventListener('change', function() {
+                    const isChecked = this.checked;
+                    items.forEach(item => {
+                        const cb = item.querySelector('.permission-checkbox');
+                        if (cb) {
+                            cb.checked = isChecked;
+                            if (isChecked) item.classList.add('checked');
+                            else item.classList.remove('checked');
+                        }
+                    });
+                });
+            }
+
+            // Individual item listeners
+            items.forEach(item => {
+                const cb = item.querySelector('.permission-checkbox');
+                if (!cb) return;
+
+                cb.addEventListener('change', function() {
+                    if (this.checked) item.classList.add('checked');
+                    else item.classList.remove('checked');
+                    syncMaster();
+                });
+
+                // Card background click
+                item.addEventListener('click', function(e) {
+                    // Ignore clicks on the checkbox itself or the label
+                    if (e.target.closest('.permission-checkbox') || e.target.closest('.form-check-label')) {
+                        return;
+                    }
+                    
+                    cb.checked = !cb.checked;
+                    // Trigger change event manually
+                    cb.dispatchEvent(new Event('change'));
+                });
+            });
+
+            // Initial sync
+            syncMaster();
+        });
+    </script>
+</div>
 </body>
 </html>

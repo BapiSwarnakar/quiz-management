@@ -1,5 +1,6 @@
 package com.stech.quiz.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.util.List;
@@ -22,6 +23,7 @@ public class Quiz {
     @JoinColumn(name = "category_id")
     private QuizCategory category;
     
+    @JsonIgnore
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL)
     private List<Question> questions;
 }

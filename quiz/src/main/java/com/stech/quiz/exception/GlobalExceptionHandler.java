@@ -1,6 +1,7 @@
 package com.stech.quiz.exception;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -31,6 +32,13 @@ public class GlobalExceptionHandler {
         model.addAttribute("error", ex.getMessage());
         model.addAttribute("status", 401);
         return "error/unauthorized";
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public String handleAccessDeniedException(AccessDeniedException ex, Model model) {
+        model.addAttribute("error", "Access Denied: " + ex.getMessage());
+        model.addAttribute("status", 403);
+        return "error/403";
     }
 
     @ExceptionHandler(Exception.class)

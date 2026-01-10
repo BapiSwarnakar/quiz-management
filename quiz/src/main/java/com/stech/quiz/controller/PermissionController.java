@@ -4,6 +4,8 @@ import com.stech.quiz.dto.PermissionDto;
 import com.stech.quiz.service.PermissionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,6 +22,7 @@ public class PermissionController {
     private final PermissionService permissionService;
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('PERMISSION_VIEW')")
     public String listPermissions(Model model) {
         List<PermissionDto> permissions = permissionService.getAllPermissions();
         model.addAttribute("permissions", permissions);
@@ -27,12 +30,14 @@ public class PermissionController {
     }
 
     @GetMapping("/create")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('PERMISSION_CREATE')")
     public String showCreateForm(Model model) {
         model.addAttribute("permission", new PermissionDto());
         return "admin/permissions/form";
     }
 
     @PostMapping("/save")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('PERMISSION_CREATE')")
     public String savePermission(@Valid @ModelAttribute("permission") PermissionDto permissionDto,
                                BindingResult result,
                                RedirectAttributes redirectAttributes) {
@@ -51,6 +56,7 @@ public class PermissionController {
     }
 
     @GetMapping("/edit/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('PERMISSION_EDIT')")
     public String showEditForm(@PathVariable Long id, Model model) {
         PermissionDto permissionDto = permissionService.getPermissionById(id);
         model.addAttribute("permission", permissionDto);
@@ -58,6 +64,7 @@ public class PermissionController {
     }
 
     @PostMapping("/update/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('PERMISSION_EDIT')")
     public String updatePermission(@PathVariable Long id,
                                  @Valid @ModelAttribute("permission") PermissionDto permissionDto,
                                  BindingResult result,
@@ -77,6 +84,7 @@ public class PermissionController {
     }
 
     @GetMapping("/delete/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('PERMISSION_DELETE')")
     public String deletePermission(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             permissionService.deletePermission(id);

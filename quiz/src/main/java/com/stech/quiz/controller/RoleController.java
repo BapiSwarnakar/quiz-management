@@ -11,6 +11,8 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Controller
 @RequestMapping("/admin/roles")
+
 @RequiredArgsConstructor
 public class RoleController {
 
@@ -31,6 +34,7 @@ public class RoleController {
     private final PermissionRepository permissionRepository;
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('ROLE_VIEW')")
     public String listRoles(Model model) {
         List<RoleDto> roles = roleService.getAllRoles();
         model.addAttribute("roles", roles);
@@ -38,12 +42,14 @@ public class RoleController {
     }
 
     @GetMapping("/create")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('ROLE_CREATE')")
     public String showCreateForm(Model model) {
         model.addAttribute("role", new RoleDto());
         return "admin/roles/form";
     }
 
     @PostMapping("/save")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('ROLE_CREATE')")
     public String saveRole(@Valid @ModelAttribute("role") RoleDto roleDto,
                          BindingResult result,
                          RedirectAttributes redirectAttributes) {
@@ -62,6 +68,7 @@ public class RoleController {
     }
 
     @GetMapping("/edit/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('ROLE_UPDATE')")
     public String showEditForm(@PathVariable Long id, Model model) {
         RoleDto roleDto = roleService.getRoleById(id);
         model.addAttribute("role", roleDto);
@@ -69,6 +76,7 @@ public class RoleController {
     }
 
     @PostMapping("/update/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('ROLE_UPDATE')")
     public String updateRole(@PathVariable Long id,
                            @Valid @ModelAttribute("role") RoleDto roleDto,
                            BindingResult result,
@@ -89,6 +97,7 @@ public class RoleController {
     }
 
     @GetMapping("/delete/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('ROLE_DELETE')")
     public String deleteRole(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             roleService.deleteRole(id);
@@ -100,6 +109,7 @@ public class RoleController {
     }
 
     @GetMapping("/{id}/permissions")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('ROLE_UPDATE')")
     public String showAssignPermissionsForm(@PathVariable Long id, Model model) {
         // Get role with permissions initialized
         Role role = roleRepository.findById(id)
@@ -119,6 +129,7 @@ public class RoleController {
     }
 
     @PostMapping("/{roleId}/permissions/update")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('ROLE_UPDATE')")
     @Transactional
     public String updateRolePermissions(
             @PathVariable Long roleId,

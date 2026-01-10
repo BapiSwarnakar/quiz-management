@@ -1,7 +1,6 @@
 package com.stech.quiz.controller;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Controller
 @RequestMapping("/admin/reports")
-@PreAuthorize("hasRole('ADMIN') or hasAnyAuthority('REPORT_VIEW', 'REPORT_EXPORT', 'REPORT_ANALYTICS')")
 @RequiredArgsConstructor
 @Slf4j
 public class ReportController {

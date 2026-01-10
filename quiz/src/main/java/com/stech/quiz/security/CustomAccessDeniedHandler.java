@@ -16,10 +16,11 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     public void handle(HttpServletRequest request, 
                       HttpServletResponse response, 
                       AccessDeniedException accessDeniedException) throws IOException, ServletException {
-        // Set the error status and message in request scope
+        // Set the error status in request scope for CustomErrorController
         request.setAttribute("jakarta.servlet.error.status_code", HttpServletResponse.SC_FORBIDDEN);
-        request.setAttribute("jakarta.servlet.error.request_uri", request.getRequestURI());
-        request.setAttribute("jakarta.servlet.error.message", "Access is denied");
+        
+        // Also set the response status explicitly
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         
         // Forward to the error controller
         request.getRequestDispatcher("/error").forward(request, response);

@@ -368,13 +368,13 @@
                         <td class="text-center">
                             <div class="action-buttons">
                                 <a th:href="@{/admin/permissions/edit/{id}(id=${permission.id})}"
-                                   class="btn btn-sm btn-edit" title="Edit permission">
+                                   class="btn btn-sm btn-edit" title="Edit permission" sec:authorize="hasRole('ROLE_ADMIN') or hasAuthority('PERMISSION_EDIT')">
                                     <i class="bi bi-pencil-square"></i>Edit
                                 </a>
                                 <a th:href="@{/admin/permissions/delete/{id}(id=${permission.id})}"
                                    class="btn btn-sm btn-delete"
                                    onclick="return confirm('Are you sure you want to delete this permission? This action cannot be undone.');"
-                                   title="Delete permission">
+                                   title="Delete permission" sec:authorize="hasRole('ROLE_ADMIN') or hasAuthority('PERMISSION_DELETE')">
                                     <i class="bi bi-trash"></i>Delete
                                 </a>
                             </div>

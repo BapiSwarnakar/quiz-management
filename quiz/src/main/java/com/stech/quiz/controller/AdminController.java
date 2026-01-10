@@ -1,28 +1,33 @@
 package com.stech.quiz.controller;
 
-import com.stech.quiz.entity.User;
-import com.stech.quiz.entity.Role;
-import com.stech.quiz.entity.Quiz;
-import com.stech.quiz.service.UserService;
-import com.stech.quiz.service.QuizService;
-import com.stech.quiz.service.CategoryService;
-import com.stech.quiz.service.StatisticsService;
-import com.stech.quiz.repository.RoleRepository;
-import lombok.RequiredArgsConstructor;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
-import java.util.HashSet;
-import java.util.Set;
+import com.stech.quiz.entity.Quiz;
+import com.stech.quiz.entity.Role;
+import com.stech.quiz.entity.User;
+import com.stech.quiz.repository.RoleRepository;
+import com.stech.quiz.service.CategoryService;
+import com.stech.quiz.service.QuizService;
+import com.stech.quiz.service.StatisticsService;
+import com.stech.quiz.service.UserService;
+
+import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequestMapping("/admin")
-@PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
 public class AdminController {
     private final UserService userService;
@@ -32,6 +37,7 @@ public class AdminController {
     private final RoleRepository roleRepository;
 
     @GetMapping("/dashboard")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('DASHBOARD_VIEW')")
     public String adminDashboard(Model model) {
         model.addAttribute("userCount", userService.getUserCount());
         model.addAttribute("quizCount", quizService.getQuizCount());
@@ -41,6 +47,7 @@ public class AdminController {
     }
 
     @GetMapping("/users")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('USER_VIEW')")
     public String listUsers(Model model) {
         List<User> users = userService.findAllUsers();
         model.addAttribute("users", users);
@@ -48,6 +55,7 @@ public class AdminController {
     }
 
     @GetMapping("/users/new")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('USER_CREATE')")
     public String newUserForm(Model model) {
         User user = new User();
         List<Role> allRoles = roleRepository.findAll();
@@ -57,6 +65,7 @@ public class AdminController {
     }
 
     @PostMapping("/users/new")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('USER_CREATE')")
     public String createUser(@ModelAttribute User user, 
                             @RequestParam(required = false) List<Long> roleIds,
                             @RequestParam String password,
@@ -90,6 +99,7 @@ public class AdminController {
     }
 
     @GetMapping("/users/edit/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('USER_EDIT')")
     public String editUserForm(@PathVariable Long id, Model model) {
         User user = userService.findUserById(id);
         List<Role> allRoles = roleRepository.findAll();
@@ -99,6 +109,7 @@ public class AdminController {
     }
 
     @PostMapping("/users/edit/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('USER_EDIT')")
     public String updateUser(@PathVariable Long id, @ModelAttribute User user, 
                             @RequestParam(required = false) List<Long> roleIds,
                             RedirectAttributes redirectAttributes) {
@@ -127,18 +138,21 @@ public class AdminController {
     }
 
     @PostMapping("/users/delete")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('USER_DELETE')")
     public String deleteUser(@RequestParam("userId") Long userId) {
         userService.deleteUserById(userId);
         return "redirect:/admin/users";
     }
 
     @GetMapping("/quizzes")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('QUIZ_VIEW')")
     public String listQuizzes(Model model) {
         model.addAttribute("quizzes", quizService.findAllQuizzes());
         return "admin/quizzes";
     }
 
     @GetMapping("/quizzes/create")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('QUIZ_CREATE')")
     public String createQuizForm(Model model) {
         Quiz quiz = new Quiz();
         model.addAttribute("quiz", quiz);
@@ -147,6 +161,7 @@ public class AdminController {
     }
 
     @PostMapping("/quizzes/create")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('QUIZ_CREATE')")
     public String createQuiz(@ModelAttribute Quiz quiz, 
                             @RequestParam(required = false) Long categoryId,
                             RedirectAttributes redirectAttributes) {
@@ -164,6 +179,7 @@ public class AdminController {
     }
 
     @GetMapping("/quizzes/edit/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('QUIZ_EDIT')")
     public String editQuizForm(@PathVariable Long id, Model model) {
         Quiz quiz = quizService.findQuizById(id);
         model.addAttribute("quiz", quiz);
@@ -172,6 +188,7 @@ public class AdminController {
     }
 
     @PostMapping("/quizzes/edit/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('QUIZ_EDIT')")
     public String updateQuiz(@PathVariable Long id, @ModelAttribute Quiz quiz,
                             @RequestParam(required = false) Long categoryId,
                             RedirectAttributes redirectAttributes) {
@@ -196,6 +213,7 @@ public class AdminController {
     }
 
     @PostMapping("/quizzes/delete")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('QUIZ_DELETE')")
     public String deleteQuiz(@RequestParam("quizId") Long quizId, RedirectAttributes redirectAttributes) {
         try {
             quizService.deleteQuizById(quizId);

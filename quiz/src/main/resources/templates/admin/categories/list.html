@@ -393,12 +393,12 @@
                                 </td>
                                 <td class="text-center">
                                     <div class="action-buttons">
-                                        <a th:href="@{/admin/categories/edit/{id}(id=${category.id})}" class="btn btn-sm btn-edit" title="Edit category">
+                                        <a th:href="@{/admin/categories/edit/{id}(id=${category.id})}" class="btn btn-sm btn-edit" title="Edit category" sec:authorize="hasRole('ROLE_ADMIN') or hasAuthority('CATEGORY_EDIT')">
                                             <i class="bi bi-pencil-square"></i>Edit
                                         </a>
                                         <form th:action="@{/admin/categories/delete}" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this category? This action cannot be undone.');">
                                             <input type="hidden" name="categoryId" th:value="${category.id}">
-                                            <button type="submit" class="btn btn-sm btn-delete" title="Delete category">
+                                            <button type="submit" class="btn btn-sm btn-delete" title="Delete category" sec:authorize="hasRole('ROLE_ADMIN') or hasAuthority('CATEGORY_DELETE')">
                                                 <i class="bi bi-trash"></i>Delete
                                             </button>
                                         </form>

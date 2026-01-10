@@ -5,6 +5,8 @@ import com.stech.quiz.entity.Answer;
 import com.stech.quiz.service.QuizService;
 import com.stech.quiz.service.QuestionService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -19,12 +21,14 @@ public class QuestionController {
     private final QuizService quizService;
 
     @GetMapping("/quiz/{quizId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasAuthority('QUESTION_READ')")
     public String listQuestions(@PathVariable Long quizId, Model model) {
         model.addAttribute("quiz", quizService.getQuizById(quizId));
         return "admin/questions/list";
     }
 
     @GetMapping("/add/{quizId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasAuthority('QUESTION_CREATE')")
     public String addQuestionForm(@PathVariable Long quizId, Model model) {
         model.addAttribute("quiz", quizService.getQuizById(quizId));
         Question question = new Question();
@@ -39,6 +43,7 @@ public class QuestionController {
     }
 
     @PostMapping("/save/{quizId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasAuthority('QUESTION_CREATE')")
     public String saveQuestion(@PathVariable Long quizId,
                              @ModelAttribute Question question,
                              @RequestParam(required = false) Integer correctAnswerIndex) {
@@ -48,6 +53,7 @@ public class QuestionController {
     }
 
     @GetMapping("/edit/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasAuthority('QUESTION_UPDATE')")
     public String editQuestionForm(@PathVariable Long id, Model model) {
         Question question = questionService.getQuestion(id);
         // Ensure the form shows exactly 4 answer slots
@@ -63,6 +69,7 @@ public class QuestionController {
     }
 
     @PostMapping("/update/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasAuthority('QUESTION_UPDATE')")
     public String updateQuestion(@PathVariable Long id,
                                @ModelAttribute Question question,
                                @RequestParam(required = false) Integer correctAnswerIndex) {
@@ -74,6 +81,7 @@ public class QuestionController {
     }
 
     @PostMapping("/delete/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasAuthority('QUESTION_DELETE')")
     public String deleteQuestion(@PathVariable Long id) {
         Question question = questionService.getQuestion(id);
         Long quizId = question.getQuiz().getId();

@@ -1,5 +1,6 @@
 package com.stech.quiz.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -29,6 +30,7 @@ public class QuizResult {
     private LocalDateTime endTime;
     private String status;
     
+    @JsonIgnore
     @OneToOne
     @JoinColumn(name = "attempt_id", unique = true)
     private QuizAttempt attempt;

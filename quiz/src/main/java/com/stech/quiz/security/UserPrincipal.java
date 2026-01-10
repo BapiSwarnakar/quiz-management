@@ -1,5 +1,6 @@
 package com.stech.quiz.security;
 
+import com.stech.quiz.entity.Role;
 import com.stech.quiz.entity.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -7,8 +8,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
-
+import lombok.extern.slf4j.Slf4j;
+@Slf4j
 public class UserPrincipal implements UserDetails {
     private Long id;
     private String name;
@@ -26,31 +29,46 @@ public class UserPrincipal implements UserDetails {
     }
 
     public static UserPrincipal create(User user) {
-        // Get roles and permissions
-        List<GrantedAuthority> authorities = user.getRoles().stream()
-                .flatMap(role -> {
-                    // Add the role itself as an authority
-                    List<GrantedAuthority> roleAuthorities = new java.util.ArrayList<>();
-                    roleAuthorities.add(new SimpleGrantedAuthority(role.getName()));
-                    
-                    // Add all permissions from the role as authorities
-                    if (role.getPermissions() != null) {
-                        role.getPermissions().stream()
-                            .map(permission -> new SimpleGrantedAuthority(permission.getName()))
-                            .forEach(roleAuthorities::add);
+        log.info("Creating UserPrincipal for user: {}", user.getEmail());
+        
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        
+        if (user.getRoles() != null) {
+            for (Role role : user.getRoles()) {
+                // Add role itself
+                String roleName = role.getName();
+                if (!roleName.startsWith("ROLE_")) {
+                    roleName = "ROLE_" + roleName;
+                }
+                authorities.add(new SimpleGrantedAuthority(roleName));
+                log.info("Added Role Authority: {}", roleName);
+                
+                // Add permissions from this role
+                if (role.getPermissions() != null) {
+                    for (var permission : role.getPermissions()) {
+                        String permName = permission.getName();
+                        authorities.add(new SimpleGrantedAuthority(permName));
+                        log.info("  Added Permission Authority from role {}: {}", roleName, permName);
                     }
-                    
-                    return roleAuthorities.stream();
-                })
+                }
+            }
+        }
+
+        List<GrantedAuthority> distinctAuthorities = authorities.stream()
                 .distinct()
                 .collect(Collectors.toList());
+
+        log.info("Final authority list for {}: {}", user.getEmail(), 
+                 distinctAuthorities.stream()
+                     .map(GrantedAuthority::getAuthority)
+                     .collect(Collectors.joining(", ")));
 
         return new UserPrincipal(
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
                 user.getPassword(),
-                authorities
+                distinctAuthorities
         );
     }
 
